@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 1696789995410-1
+      id: 1696872829002-1
       author: ivanp (generated)
       objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
       changes:
@@ -19,7 +19,7 @@ databaseChangeLog:
                   type: VARCHAR(255)
             tableName: roles
   - changeSet:
-      id: 1696789995410-2
+      id: 1696872829002-2
       author: ivanp (generated)
       objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
       changes:
@@ -39,9 +39,14 @@ databaseChangeLog:
               - column:
                   name: password
                   type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: balance
+                  type: DOUBLE
             tableName: users
   - changeSet:
-      id: 1696789995410-3
+      id: 1696872829002-3
       author: ivanp (generated)
       objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
       changes:
@@ -59,7 +64,7 @@ databaseChangeLog:
                   type: BIGINT
             tableName: users_roles
   - changeSet:
-      id: 1696789995410-4
+      id: 1696872829002-4
       author: ivanp (generated)
       objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
       changes:
@@ -70,7 +75,7 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: roles
   - changeSet:
-      id: 1696789995410-5
+      id: 1696872829002-5
       author: ivanp (generated)
       objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
       changes:

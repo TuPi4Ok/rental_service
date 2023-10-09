@@ -10,6 +10,10 @@ spring:
     url: jdbc:postgresql://localhost:5432/App_db
     username: "postgres"
     password: "ivan2004"
+  sql:
+    init:
+      schema-locations: classpath:init.sql
+      mode: always
   jpa:
     hibernate:
       ddl-auto: update

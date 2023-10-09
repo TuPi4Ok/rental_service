@@ -1,10 +1,10 @@
-package ivan.prh.app.dto;
+package ivan.prh.app.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class AuthResponse {
+public class AuthUserResponse {
     private String token;
 }

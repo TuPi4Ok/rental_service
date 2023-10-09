@@ -56,7 +56,7 @@ public class JwtTokenUtils {
         return Jwts.parser()
                 .verifyWith(key)
                 .build()
-                .parseUnsecuredClaims(token)
-                .getPayload();
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

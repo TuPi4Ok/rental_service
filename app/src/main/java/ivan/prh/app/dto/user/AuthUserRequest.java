@@ -1,9 +1,9 @@
-package ivan.prh.app.dto;
+package ivan.prh.app.dto.user;
 
 import lombok.Data;
 
 @Data
-public class AuthRequest {
+public class AuthUserRequest {
     private String username;
     private String password;
 }
