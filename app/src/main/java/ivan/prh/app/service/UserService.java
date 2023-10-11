@@ -7,6 +7,7 @@ import ivan.prh.app.repository.UserRepository;
 import ivan.prh.app.util.JwtTokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -52,14 +54,16 @@ public class UserService implements UserDetailsService {
         );
     }
 
-    public ResponseEntity<?> createNewUser(AuthUserRequest authRequest) {
-        if (findByUsername(authRequest.getUsername()).isPresent()) {
-            return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(), "Пользователь с указанным именем уже существует"), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> createNewUser(AuthUserRequest authUserRequest) {
+        if (findByUsername(authUserRequest.getUsername()).isPresent()) {
+            return new ResponseEntity<>(
+                    new AppError(HttpStatus.BAD_REQUEST.value(), "Пользователь с указанным именем уже существует"), HttpStatus.BAD_REQUEST
+            );
         }
 
         User user = new User();
-        user.setUserName(authRequest.getUsername());
-        user.setPassword(passwordEncoder.encode(authRequest.getPassword()));
+        user.setUserName(authUserRequest.getUsername());
+        user.setPassword(passwordEncoder.encode(authUserRequest.getPassword()));
         user.setRoles(List.of(roleService.findRoleByName("ROLE_USER")));
         userRepository.save(user);
         return ResponseEntity.ok("Пользователь создан");
@@ -68,5 +72,31 @@ public class UserService implements UserDetailsService {
     public ResponseEntity<?> getUser(String token) {
         String userName = jwtTokenUtils.getUsername(token);
         return ResponseEntity.of(userRepository.findUserByUserName(userName));
+    }
+
+    public ResponseEntity<?> updateUser(AuthUserRequest authUserRequest, String token) {
+        if (findByUsername(authUserRequest.getUsername()).isPresent()) {
+            return new ResponseEntity<>(
+                    new AppError(HttpStatus.BAD_REQUEST.value(), "Пользователь с указанным именем уже существует"), HttpStatus.BAD_REQUEST
+            );
+        }
+        User currentUser;
+        try {
+            currentUser = userRepository.findUserByUserName(jwtTokenUtils.getUsername(token)).get();
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(
+                    new AppError(HttpStatus.BAD_REQUEST.value(), "Подпись неправильная"), HttpStatus.BAD_REQUEST
+            );
+        }
+
+        currentUser.setUserName(authUserRequest.getUsername());
+        currentUser.setPassword(passwordEncoder.encode(authUserRequest.getPassword()));
+        userRepository.save(currentUser);
+        return ResponseEntity.ok("Пользователь обновлен");
+    }
+
+    public ResponseEntity<?> signOutUser(String token) {
+        jwtTokenUtils.addToBlackList(token);
+        return ResponseEntity.ok("Пользователь вышел из системы");
     }
 }

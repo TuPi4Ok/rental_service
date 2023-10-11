@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtTokenUtils jwtTokenUtils;
     @Override
@@ -33,10 +32,9 @@ public class JwtFilter extends OncePerRequestFilter {
             jwt = authHeader.substring(7);
             try {
                 username = jwtTokenUtils.getUsername(jwt);
-            } catch (ExpiredJwtException e) {
-                log.debug("Время жизни токена вышло");
-            } catch (JwtException e) {
-                log.debug("Подпись неправильная");
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                return;
             }
         }
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

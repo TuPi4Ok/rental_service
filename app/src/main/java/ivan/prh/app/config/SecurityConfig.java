@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -34,9 +35,13 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(CorsConfigurer::disable)
-                .authorizeRequests()
-                .anyRequest().permitAll()
-                .and()
+                .authorizeHttpRequests(request ->
+                        request
+                                .requestMatchers("/Account/Me").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/Account/Out").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers("/Account/Update").hasAnyRole("USER", "ADMIN")
+                                .anyRequest().authenticated()
+                ).formLogin(Customizer.withDefaults())
                 .sessionManagement(httpP -> httpP.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(
                         httpC -> httpC.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
