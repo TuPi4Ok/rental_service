@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -37,12 +38,17 @@ public class SecurityConfig {
                 .cors(CorsConfigurer::disable)
                 .authorizeHttpRequests(request ->
                         request
-                                .requestMatchers("/Account/Me").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/Account/Out").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/Account/Update").hasAnyRole("USER", "ADMIN")
-                                .anyRequest().authenticated()
-                ).formLogin(Customizer.withDefaults())
-                .sessionManagement(httpP -> httpP.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .requestMatchers(HttpMethod.GET,"/Account/Me").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.POST,"/Account/SignOut").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.PUT,"/Account/Update").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.GET,"/Admin/Account").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET,"/Admin/Account/{id}").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST,"/Admin/Account").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE,"/Admin/Account/{id}").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT,"/Admin/Account/{id}").hasAnyRole("ADMIN")
+                                .anyRequest().permitAll()
+                )
+                .sessionManagement(h -> h.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(
                         httpC -> httpC.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 )

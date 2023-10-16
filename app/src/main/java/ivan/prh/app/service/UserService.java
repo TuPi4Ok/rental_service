@@ -3,11 +3,10 @@ package ivan.prh.app.service;
 import ivan.prh.app.dto.user.AuthUserRequest;
 import ivan.prh.app.exception.AppError;
 import ivan.prh.app.model.User;
-import ivan.prh.app.repository.UserRepository;
+import ivan.prh.app.repository.AccountRepository;
 import ivan.prh.app.util.JwtTokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
 public class UserService implements UserDetailsService {
 
     @Autowired
-    UserRepository userRepository;
+    AccountRepository accountRepository;
     @Lazy
     @Autowired
     BCryptPasswordEncoder passwordEncoder;
@@ -37,7 +36,7 @@ public class UserService implements UserDetailsService {
     JwtTokenUtils jwtTokenUtils;
 
     public Optional<User> findByUsername(String username) {
-        return userRepository.findUserByUserName(username);
+        return accountRepository.findUserByUserName(username);
     }
 
     @Override
@@ -65,24 +64,22 @@ public class UserService implements UserDetailsService {
         user.setUserName(authUserRequest.getUsername());
         user.setPassword(passwordEncoder.encode(authUserRequest.getPassword()));
         user.setRoles(List.of(roleService.findRoleByName("ROLE_USER")));
-        userRepository.save(user);
+        accountRepository.save(user);
         return ResponseEntity.ok("Пользователь создан");
     }
 
     public ResponseEntity<?> getUser(String token) {
         String userName = jwtTokenUtils.getUsername(token);
-        return ResponseEntity.of(userRepository.findUserByUserName(userName));
+        return ResponseEntity.of(accountRepository.findUserByUserName(userName));
     }
 
     public ResponseEntity<?> updateUser(AuthUserRequest authUserRequest, String token) {
         if (findByUsername(authUserRequest.getUsername()).isPresent()) {
-            return new ResponseEntity<>(
-                    new AppError(HttpStatus.BAD_REQUEST.value(), "Пользователь с указанным именем уже существует"), HttpStatus.BAD_REQUEST
-            );
+            return ResponseEntity.status(400).body("Пользователь с таким именем уже существует");
         }
         User currentUser;
         try {
-            currentUser = userRepository.findUserByUserName(jwtTokenUtils.getUsername(token)).get();
+            currentUser = accountRepository.findUserByUserName(jwtTokenUtils.getUsername(token)).get();
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(
                     new AppError(HttpStatus.BAD_REQUEST.value(), "Подпись неправильная"), HttpStatus.BAD_REQUEST
@@ -91,7 +88,7 @@ public class UserService implements UserDetailsService {
 
         currentUser.setUserName(authUserRequest.getUsername());
         currentUser.setPassword(passwordEncoder.encode(authUserRequest.getPassword()));
-        userRepository.save(currentUser);
+        accountRepository.save(currentUser);
         return ResponseEntity.ok("Пользователь обновлен");
     }
 

@@ -33,7 +33,7 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 username = jwtTokenUtils.getUsername(jwt);
             } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
         }
