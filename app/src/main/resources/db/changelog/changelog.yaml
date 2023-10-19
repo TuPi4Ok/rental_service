@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 1696872829002-1
+      id: 1697552155834-1
       author: ivanp (generated)
       objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
       changes:
@@ -19,7 +19,62 @@ databaseChangeLog:
                   type: VARCHAR(255)
             tableName: roles
   - changeSet:
-      id: 1696872829002-2
+      id: 1697552155834-2
+      author: ivanp (generated)
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_transport
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: can_be_rented
+                  type: BOOLEAN
+              - column:
+                  name: transport_type
+                  type: VARCHAR(255)
+              - column:
+                  name: model
+                  type: VARCHAR(255)
+              - column:
+                  name: color
+                  type: VARCHAR(255)
+              - column:
+                  name: identifier
+                  type: VARCHAR(255)
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: latitude
+                  type: DOUBLE
+              - column:
+                  constraints:
+                    nullable: false
+                  name: longitude
+                  type: DOUBLE
+              - column:
+                  name: minute_price
+                  type: DOUBLE
+              - column:
+                  name: day_price
+                  type: DOUBLE
+              - column:
+                  name: user_id
+                  type: BIGINT
+            tableName: transport
+  - changeSet:
+      id: 1697552155834-3
       author: ivanp (generated)
       objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
       changes:
@@ -46,7 +101,7 @@ databaseChangeLog:
                   type: DOUBLE
             tableName: users
   - changeSet:
-      id: 1696872829002-3
+      id: 1697552155834-4
       author: ivanp (generated)
       objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
       changes:
@@ -64,7 +119,18 @@ databaseChangeLog:
                   type: BIGINT
             tableName: users_roles
   - changeSet:
-      id: 1696872829002-4
+      id: 1697552155834-5
+      author: ivanp (generated)
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: transport
+            constraintName: FK_TRANSPORT_ON_USER
+            referencedColumnNames: id
+            referencedTableName: users
+  - changeSet:
+      id: 1697552155834-6
       author: ivanp (generated)
       objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
       changes:
@@ -75,7 +141,7 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableName: roles
   - changeSet:
-      id: 1696872829002-5
+      id: 1697552155834-7
       author: ivanp (generated)
       objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
       changes:
@@ -85,3 +151,4 @@ databaseChangeLog:
             constraintName: fk_userol_on_user
             referencedColumnNames: id
             referencedTableName: users
+

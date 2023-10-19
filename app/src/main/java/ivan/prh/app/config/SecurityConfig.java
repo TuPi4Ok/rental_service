@@ -46,6 +46,8 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST,"/Admin/Account").hasAnyRole("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE,"/Admin/Account/{id}").hasAnyRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT,"/Admin/Account/{id}").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST,"/Payment/Hesoyam/{accountId}").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.POST,"/Transport").hasAnyRole("USER", "ADMIN")
                                 .anyRequest().permitAll()
                 )
                 .sessionManagement(h -> h.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

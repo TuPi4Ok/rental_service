@@ -25,4 +25,6 @@ public class User {
     )
     private Collection<Role> roles;
     private double balance;
+    @OneToMany(mappedBy = "user")
+    private Collection<Transport> transports;
 }
