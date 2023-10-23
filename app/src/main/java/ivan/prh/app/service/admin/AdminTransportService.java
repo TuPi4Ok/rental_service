@@ -34,10 +34,8 @@ public class AdminTransportService {
         Transport transport = new Transport();
         mapperUtils.transportDtoToTransport(transportDto, transport);
 
-        if(userService.findById(transportDto.getOwnerId()).isEmpty()) {
-            return ResponseEntity.status(400).body("Пользователь не существует");
-        }
-        transport.setUser(userService.findById(transportDto.getOwnerId()).get());
+        userService.findById(transportDto.getOwnerId());
+        transport.setUser(userService.findById(transportDto.getOwnerId()));
         transportRepository.save(transport);
         return ResponseEntity.ok("Транспорт создан");
     }
@@ -48,10 +46,8 @@ public class AdminTransportService {
             return ResponseEntity.notFound().build();
         Transport transport = transportRepository.getTransportById(id).get();
         transport = mapperUtils.transportDtoToTransport(transportDto, transport);
-        if(userService.findById(transportDto.getOwnerId()).isEmpty()) {
-            return ResponseEntity.status(400).body("Пользователь не существует");
-        }
-        transport.setUser(userService.findById(transportDto.getOwnerId()).get());
+        userService.findById(transportDto.getOwnerId());
+        transport.setUser(userService.findById(transportDto.getOwnerId()));
         transportRepository.save(transport);
         return ResponseEntity.ok("Транспорт обновлен");
     }
