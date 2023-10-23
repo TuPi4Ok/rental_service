@@ -1,17 +1,21 @@
-package ivan.prh.app.controller;
+package ivan.prh.app.controller.admin;
 
+import ivan.prh.app.controller.BaseController;
 import ivan.prh.app.dto.admin.AdminRequest;
-import ivan.prh.app.dto.user.AuthUserRequest;
-import ivan.prh.app.service.AdminService;
-import ivan.prh.app.service.UserService;
+import ivan.prh.app.service.admin.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/Admin/Account")
-public class AdminAccountController {
+public class AdminAccountController extends BaseController {
     @Autowired
     AdminService adminService;
     @GetMapping("")

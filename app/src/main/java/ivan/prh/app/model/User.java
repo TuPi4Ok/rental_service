@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Collection;
+import java.util.Objects;
 
 
 @Entity
@@ -27,4 +28,19 @@ public class User {
     private double balance;
     @OneToMany(mappedBy = "user")
     private Collection<Transport> transports;
+    @OneToMany(mappedBy = "user")
+    private Collection<Rent> rents;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

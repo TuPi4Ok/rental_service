@@ -1,9 +1,10 @@
-package ivan.prh.app.service;
+package ivan.prh.app.service.admin;
 
 import ivan.prh.app.dto.admin.AdminRequest;
 import ivan.prh.app.model.Role;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.AccountRepository;
+import ivan.prh.app.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;

@@ -2,6 +2,8 @@ package ivan.prh.app.service;
 
 import ivan.prh.app.dto.user.AuthUserRequest;
 import ivan.prh.app.exception.AppError;
+import ivan.prh.app.exception.NotFoundException;
+import ivan.prh.app.model.Rent;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.AccountRepository;
 import ivan.prh.app.util.JwtTokenUtils;
@@ -10,6 +12,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -37,6 +40,10 @@ public class UserService implements UserDetailsService {
 
     public Optional<User> findByUsername(String username) {
         return accountRepository.findUserByUserName(username);
+    }
+
+    public User getCurrentUser() {
+        return findByUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString()).get();
     }
 
     @Override
@@ -79,7 +86,7 @@ public class UserService implements UserDetailsService {
         }
         User currentUser;
         try {
-            currentUser = accountRepository.findUserByUserName(jwtTokenUtils.getUsername(token)).get();
+            currentUser = getCurrentUser();
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(
                     new AppError(HttpStatus.BAD_REQUEST.value(), "Подпись неправильная"), HttpStatus.BAD_REQUEST
@@ -96,4 +103,11 @@ public class UserService implements UserDetailsService {
         jwtTokenUtils.addToBlackList(token);
         return ResponseEntity.ok("Пользователь вышел из системы");
     }
+
+    public User findById(long id) {
+        if (!accountRepository.existsById(id))
+            throw new NotFoundException("Пользователь не найден");
+        return accountRepository.findUserById(id).get();
+    }
+
 }

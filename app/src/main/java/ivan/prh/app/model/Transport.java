@@ -5,6 +5,8 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.Collection;
+
 @Data
 @Entity
 public class Transport {
@@ -28,4 +30,6 @@ public class Transport {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+    @OneToMany(mappedBy = "transport")
+    private Collection<Rent> rents;
 }

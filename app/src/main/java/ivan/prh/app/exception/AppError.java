@@ -15,4 +15,6 @@ public class AppError {
         this.message = message;
         this.timestamp = new Date();
     }
+
+
 }

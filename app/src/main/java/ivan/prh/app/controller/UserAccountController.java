@@ -1,16 +1,22 @@
 package ivan.prh.app.controller;
 
+import com.fasterxml.jackson.databind.ser.Serializers;
 import ivan.prh.app.dto.user.AuthUserRequest;
 import ivan.prh.app.service.AuthService;
 import ivan.prh.app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 @RestController
 @RequestMapping("/Account")
-public class UserAccountController {
+public class UserAccountController extends BaseController {
     @Autowired
     AuthService authService;
     @Autowired
@@ -28,8 +34,6 @@ public class UserAccountController {
 
     @GetMapping("/Me")
     public ResponseEntity<?> getUser(@RequestHeader HttpHeaders headers) {
-//        if (headers.get("authorization") == null)
-//            return ResponseEntity.badRequest().body("Пользователь")
         return userService.getUser(headers.toSingleValueMap().get("authorization").substring(7));
     }
 
@@ -44,4 +48,5 @@ public class UserAccountController {
     public ResponseEntity<?> signOutUser(@RequestHeader HttpHeaders headers) {
         return userService.signOutUser(headers.toSingleValueMap().get("authorization").substring(7));
     }
+
 }
