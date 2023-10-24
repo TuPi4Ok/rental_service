@@ -15,28 +15,28 @@ public class AdminTransportController extends BaseController {
     AdminTransportService transportService;
 
     @GetMapping("")
-    public ResponseEntity<?> getTransports(/*здесь должны быть параметры!!!!*/) {
-        return transportService.getTransport();
+    public ResponseEntity<?> getTransports(@RequestParam("start") int start, @RequestParam("count") int count) {
+        return ResponseEntity.ok(transportService.getTransport(start, count));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getTransport(@PathVariable("id") long id) {
-        return transportService.getTransport(id);
+        return ResponseEntity.ok(transportService.getTransport(id));
     }
 
     @PostMapping("")
     public ResponseEntity<?> createTransport(@Valid @RequestBody AdminTransportDto transportDto) {
-        return transportService.createTransport(transportDto);
+        return ResponseEntity.ok(transportService.createTransport(transportDto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTransport(@PathVariable("id") long id, @Valid @RequestBody AdminTransportDto transportDto) {
-        return transportService.updateTransport(id, transportDto);
+        return ResponseEntity.ok(transportService.updateTransport(id, transportDto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTransport(@PathVariable("id") long id) {
-        return transportService.deleteTransport(id);
+    public void deleteTransport(@PathVariable("id") long id) {
+        transportService.deleteTransport(id);
     }
 
 }

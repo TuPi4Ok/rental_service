@@ -20,25 +20,25 @@ public class AdminAccountController extends BaseController {
     AdminService adminService;
     @GetMapping("")
     public ResponseEntity<?> getUsers(@RequestParam("start") int start, @RequestParam("count") int count) {
-        return adminService.getAllUsersWithParam(start, count);
+        return ResponseEntity.ok(adminService.getAllUsersWithParam(start, count));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUser(@PathVariable("id") long id) {
-        return adminService.getUser(id);
+        return ResponseEntity.ok(adminService.getUser(id));
     }
     @PostMapping("")
     public ResponseEntity<?> createUser(@RequestBody AdminRequest adminRequest) {
-        return adminService.createUser(adminRequest);
+        return ResponseEntity.ok(adminService.createUser(adminRequest));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable("id") long id, @RequestBody AdminRequest adminRequest) {
-        return adminService.updateUser(id, adminRequest);
+        return ResponseEntity.ok(adminService.updateUser(id, adminRequest));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable("id") long id) {
-        return adminService.deleteUser(id);
+    public void deleteUser(@PathVariable("id") long id) {
+        adminService.deleteUser(id);
     }
 }

@@ -1,6 +1,7 @@
 package ivan.prh.app.repository;
 
 import ivan.prh.app.model.Transport;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,5 +12,6 @@ import java.util.Optional;
 public interface TransportRepository extends CrudRepository<Transport, Long> {
     Optional<Transport> getTransportById(long id);
     List<Transport> findAll();
+    List<Transport> findAll(Pageable pageable);
     List<Transport> findTransportsByTransportType(String type);
 }

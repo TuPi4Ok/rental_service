@@ -1,6 +1,6 @@
 package ivan.prh.app.controller.admin;
 
-import ivan.prh.app.dto.RentDto;
+import ivan.prh.app.dto.rent.RentDtoRequest;
 import ivan.prh.app.service.admin.AdminRentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +29,8 @@ public class AdminRentController {
     }
 
     @PostMapping("/Rent")
-    public ResponseEntity<?> createRent(@Valid @RequestBody RentDto rentDto) {
-        return ResponseEntity.ok(rentService.createRent(rentDto));
+    public ResponseEntity<?> createRent(@Valid @RequestBody RentDtoRequest rentDtoRequest) {
+        return ResponseEntity.ok(rentService.createRent(rentDtoRequest));
     }
 
     @PostMapping("/Rent/End/{rentId}")
@@ -42,8 +42,8 @@ public class AdminRentController {
     }
 
     @PutMapping("/Rent/{id}")
-    public ResponseEntity<?> createRent(@PathVariable("id") long id, @Valid @RequestBody RentDto rentDto) {
-        return ResponseEntity.ok(rentService.updateRent(id, rentDto));
+    public ResponseEntity<?> createRent(@PathVariable("id") long id, @Valid @RequestBody RentDtoRequest rentDtoRequest) {
+        return ResponseEntity.ok(rentService.updateRent(id, rentDtoRequest));
     }
 
     @DeleteMapping("/Rent/{rentId}")

@@ -21,22 +21,22 @@ public class TransportController extends BaseController{
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getTransport(@Valid @PathVariable("id") long id) {
-        return transportService.getTransport(id);
+        return ResponseEntity.ok(transportService.getTransport(id));
     }
 
     @PostMapping("")
     public ResponseEntity<?> createTransport(@Valid @RequestBody TransportDto transportDto) {
-        return transportService.createTransport(transportDto);
+        return ResponseEntity.ok(transportService.createTransport(transportDto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTransport(@Valid @PathVariable("id") long id, @RequestBody TransportDto transportDto) {
-        return transportService.updateTransport(id, transportDto);
+        return ResponseEntity.ok(transportService.updateTransport(id, transportDto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTransport(@Valid @PathVariable("id") long id) {
-        return transportService.deleteTransport(id);
+    public void deleteTransport(@Valid @PathVariable("id") long id) {
+        transportService.deleteTransport(id);
     }
 
 

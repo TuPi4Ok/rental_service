@@ -1,6 +1,8 @@
 package ivan.prh.app.service;
 
 import ivan.prh.app.config.DataLoader;
+import ivan.prh.app.exception.ForbiddenException;
+import ivan.prh.app.exception.NotFoundException;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,27 +16,25 @@ public class PaymentService {
     AccountRepository accountRepository;
     @Autowired
     DataLoader dataLoader;
+    @Autowired
+    UserService userService;
 
-    public ResponseEntity<?> overflowBalance(long id) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        User user = accountRepository.findUserByUserName(username).get();
+    public void overflowBalance(long id) {
+        User user = userService.getCurrentUser();
         if (user.getRoles().contains(dataLoader.getRoleAdmin())) {
-            return overflow(id);
+            overflow(id);
         } else if (user.getRoles().contains(dataLoader.getRoleUser()) && id == user.getId()) {
-            return overflow(id);
+            overflow(id);
         } else {
-            return ResponseEntity.status(403).build();
+            throw new ForbiddenException("Недостаточно прав");
         }
 
     }
 
-    private ResponseEntity<?> overflow(long id) {
-        if(accountRepository.findUserById(id).isEmpty())
-            return ResponseEntity.notFound().build();
-        User user = accountRepository.findUserById(id).get();
+    private void overflow(long id) {
+        User user = userService.findById(id);
         double overflow = 250000;
         user.setBalance(user.getBalance() + overflow);
         accountRepository.save(user);
-        return ResponseEntity.ok("Баланс пользователя пополнен на " + overflow);
     }
 }

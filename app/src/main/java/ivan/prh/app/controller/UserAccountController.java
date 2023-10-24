@@ -33,20 +33,19 @@ public class UserAccountController extends BaseController {
     }
 
     @GetMapping("/Me")
-    public ResponseEntity<?> getUser(@RequestHeader HttpHeaders headers) {
-        return userService.getUser(headers.toSingleValueMap().get("authorization").substring(7));
+    public ResponseEntity<?> getUser() {
+        return ResponseEntity.ok(userService.getUserMe());
     }
 
     @PutMapping("/Update")
-    public ResponseEntity<?> updateUser(@RequestBody AuthUserRequest authUserRequest,
-                                        @RequestHeader HttpHeaders headers) {
-        return userService.updateUser(authUserRequest,
-                headers.toSingleValueMap().get("authorization").substring(7));
+    public ResponseEntity<?> updateUser(@RequestBody AuthUserRequest authUserRequest) {
+        return ResponseEntity.ok(userService.updateUser(authUserRequest));
     }
 
     @PostMapping("/SignOut")
     public ResponseEntity<?> signOutUser(@RequestHeader HttpHeaders headers) {
-        return userService.signOutUser(headers.toSingleValueMap().get("authorization").substring(7));
+        userService.signOutUser(headers.toSingleValueMap().get("authorization").substring(7));
+        return ResponseEntity.ok("Пользователь вышел из системы");
     }
 
 }

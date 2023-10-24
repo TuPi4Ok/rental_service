@@ -1,6 +1,6 @@
 package ivan.prh.app.service.admin;
 
-import ivan.prh.app.dto.RentDto;
+import ivan.prh.app.dto.rent.RentDtoRequest;
 import ivan.prh.app.exception.NotFoundException;
 import ivan.prh.app.model.Rent;
 import ivan.prh.app.model.Transport;
@@ -11,7 +11,9 @@ import ivan.prh.app.service.TransportService;
 import ivan.prh.app.service.UserService;
 import ivan.prh.app.util.MapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,12 +52,11 @@ public class AdminRentService {
         return rentRepository.getRentsByTransport(transport);
     }
 
-    public Rent createRent(RentDto rentDto) {
+    public Rent createRent(RentDtoRequest rentDtoRequest) {
         Rent rent = new Rent();
-        rent = mapperUtils.rentDtoToRent(rentDto, rent);
-        rent.setUser(userService.findById(rentDto.getUserId()));
+        rent = mapperUtils.rentDtoToRent(rentDtoRequest, rent);
 
-        Transport transport = transportService.findTransportById(rentDto.getTransportId());
+        Transport transport = transportService.findTransportById(rentDtoRequest.getTransportId());
         if(rent.getTimeEnd() != null) {
             transport.setCanBeRented(false);
             rent.setTransport(transport);
@@ -63,6 +64,9 @@ public class AdminRentService {
         else {
             transport.setCanBeRented(true);
         }
+        if (userService.getCurrentUser().equals(transport.getUser()))
+            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Нельзя арендовать собственный транспорт");
+        rent.setUser(userService.getCurrentUser());
         rentRepository.save(rent);
         return rent;
     }
@@ -79,12 +83,12 @@ public class AdminRentService {
         return rent;
     }
 
-    public Rent updateRent(long id, RentDto rentDto) {
+    public Rent updateRent(long id, RentDtoRequest rentDtoRequest) {
         Rent rent = getRent(id);
-        rent = mapperUtils.rentDtoToRent(rentDto, rent);
-        rent.setUser(userService.findById(rentDto.getUserId()));
+        rent = mapperUtils.rentDtoToRent(rentDtoRequest, rent);
+        rent.setUser(userService.findById(rentDtoRequest.getUserId()));
 
-        Transport transport = transportService.findTransportById(rentDto.getTransportId());
+        Transport transport = transportService.findTransportById(rentDtoRequest.getTransportId());
         if(rent.getTimeEnd() != null) {
             transport.setCanBeRented(false);
             rent.setTransport(transport);
@@ -98,6 +102,6 @@ public class AdminRentService {
     public String  deleteRent(long id) {
         Rent rent = getRent(id);
         rentRepository.delete(rent);
-        return "Арендв удалена";
+        return "Аренда удалена";
     }
 }

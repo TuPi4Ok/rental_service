@@ -10,6 +10,7 @@ import ivan.prh.app.util.JwtTokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +20,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -75,33 +77,23 @@ public class UserService implements UserDetailsService {
         return ResponseEntity.ok("Пользователь создан");
     }
 
-    public ResponseEntity<?> getUser(String token) {
-        String userName = jwtTokenUtils.getUsername(token);
-        return ResponseEntity.of(accountRepository.findUserByUserName(userName));
+    public User getUserMe() {
+        return getCurrentUser();
     }
 
-    public ResponseEntity<?> updateUser(AuthUserRequest authUserRequest, String token) {
+    public User updateUser(AuthUserRequest authUserRequest) {
         if (findByUsername(authUserRequest.getUsername()).isPresent()) {
-            return ResponseEntity.status(400).body("Пользователь с таким именем уже существует");
+            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Имя пользователя уже занято");
         }
-        User currentUser;
-        try {
-            currentUser = getCurrentUser();
-        } catch (NoSuchElementException e) {
-            return new ResponseEntity<>(
-                    new AppError(HttpStatus.BAD_REQUEST.value(), "Подпись неправильная"), HttpStatus.BAD_REQUEST
-            );
-        }
+        User currentUser = getCurrentUser();
 
         currentUser.setUserName(authUserRequest.getUsername());
         currentUser.setPassword(passwordEncoder.encode(authUserRequest.getPassword()));
-        accountRepository.save(currentUser);
-        return ResponseEntity.ok("Пользователь обновлен");
+        return accountRepository.save(currentUser);
     }
 
-    public ResponseEntity<?> signOutUser(String token) {
+    public void signOutUser(String token) {
         jwtTokenUtils.addToBlackList(token);
-        return ResponseEntity.ok("Пользователь вышел из системы");
     }
 
     public User findById(long id) {

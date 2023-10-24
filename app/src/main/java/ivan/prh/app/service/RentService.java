@@ -93,10 +93,10 @@ public class RentService {
         long unit = 1;
         Duration duration = Duration.between(rent.getTimeStart(), rent.getTimeEnd());
         if(rent.getPriceType().equals("Minutes")) {
-            unit += duration.toMinutesPart();
+            unit += duration.toMinutes();
         }
         if(rent.getPriceType().equals("Days")) {
-            unit += duration.toDaysPart();
+            unit += duration.toDays();
         }
 
         return rent.getPriceOfUnit() * unit;

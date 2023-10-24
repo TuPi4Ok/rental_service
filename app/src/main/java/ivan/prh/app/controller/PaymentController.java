@@ -14,6 +14,7 @@ public class PaymentController extends BaseController{
 
     @PostMapping("/Payment/Hesoyam/{accountId}")
     public ResponseEntity<?> overflowBalanceUser(@PathVariable("accountId") long id) {
-        return paymentService.overflowBalance(id);
+        paymentService.overflowBalance(id);
+        return ResponseEntity.ok("Баланс пользователя пополнен");
     }
 }

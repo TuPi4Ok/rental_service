@@ -1,6 +1,6 @@
 package ivan.prh.app.util;
 
-import ivan.prh.app.dto.RentDto;
+import ivan.prh.app.dto.rent.RentDtoRequest;
 import ivan.prh.app.dto.transport.TransportDto;
 import ivan.prh.app.model.Rent;
 import ivan.prh.app.model.Transport;
@@ -25,11 +25,11 @@ public class MapperUtils {
         return transport;
     }
 
-    public Rent rentDtoToRent(RentDto rentDto, Rent rent) {
-        rent.setTimeStart(LocalDateTime.parse(rentDto.getTimeStart()));
-        rent.setTimeEnd(LocalDateTime.parse(rentDto.getTimeEnd()));
-        rent.setPriceOfUnit(rentDto.getPriceOfUnit());
-        rent.setPriceType(rentDto.getPriceType());
+    public Rent rentDtoToRent(RentDtoRequest rentDtoRequest, Rent rent) {
+        rent.setTimeStart(LocalDateTime.parse(rentDtoRequest.getTimeStart()));
+        rent.setTimeEnd(LocalDateTime.parse(rentDtoRequest.getTimeEnd()));
+        rent.setPriceOfUnit(rentDtoRequest.getPriceOfUnit());
+        rent.setPriceType(rentDtoRequest.getPriceType());
         rent.setFinalPrice(rent.getFinalPrice());
         return rent;
     }

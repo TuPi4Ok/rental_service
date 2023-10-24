@@ -1,6 +1,7 @@
 package ivan.prh.app.service;
 
 import ivan.prh.app.dto.transport.TransportDto;
+import ivan.prh.app.exception.ForbiddenException;
 import ivan.prh.app.exception.NotFoundException;
 import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
@@ -32,45 +33,38 @@ public class TransportService {
         return transportRepository.getTransportById(id).get();
     }
 
-    public ResponseEntity<?> getTransport(long id) {
+    public Transport getTransport(long id) {
         if(transportRepository.getTransportById(id).isEmpty())
-            return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(transportRepository.getTransportById(id));
+            throw new NotFoundException("Транспорт не найден");
+        return transportRepository.getTransportById(id).get();
     }
 
-    public ResponseEntity<?> createTransport(TransportDto transportDto) {
+    public Transport createTransport(TransportDto transportDto) {
         Transport transport = new Transport();
         transport = mapperUtils.transportDtoToTransport(transportDto, transport);
 
         User user = userService.getCurrentUser();
         transport.setUser(user);
-        transportRepository.save(transport);
-        return ResponseEntity.ok("Транспорт создан");
+        return transportRepository.save(transport);
     }
 
-    public ResponseEntity<?> updateTransport(long id, TransportDto transportDto) {
-        if(transportRepository.getTransportById(id).isEmpty())
-            return ResponseEntity.notFound().build();
-        Transport transport = transportRepository.getTransportById(id).get();
+    public Transport updateTransport(long id, TransportDto transportDto) {
+        Transport transport = getTransport(id);
         User user = userService.getCurrentUser();
         if (user.getId() != transport.getUser().getId())
-            return ResponseEntity.status(403).body("Недостаточно прав для изменения информации о транспорте");
+            throw new ForbiddenException("Недостаточно прав");
 
         transport = mapperUtils.transportDtoToTransport(transportDto, transport);
 
-        transportRepository.save(transport);
-        return ResponseEntity.ok("Транспорт обновлен");
+        return transportRepository.save(transport);
     }
 
-    public ResponseEntity<?> deleteTransport(long id) {
-        if(transportRepository.getTransportById(id).isEmpty())
-            return ResponseEntity.notFound().build();
-        Transport transport = transportRepository.getTransportById(id).get();
+    public void deleteTransport(long id) {
+        Transport transport = getTransport(id);
         User user = userService.getCurrentUser();
         if (user.getId() != transport.getUser().getId())
-            return ResponseEntity.status(403).body("Недостаточно прав для изменения информации о транспорте");
+            throw new ForbiddenException("Недостаточно прав");
         transportRepository.delete(transport);
-        return ResponseEntity.ok("Транспорт удален");
     }
 
     public void changeCanBeRented(Transport transport, boolean canBeRented) {
