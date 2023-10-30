@@ -2,6 +2,7 @@ package ivan.prh.app.service.admin;
 
 import ivan.prh.app.dto.transport.AdminTransportDto;
 import ivan.prh.app.exception.NotFoundException;
+import ivan.prh.app.model.Rent;
 import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.TransportRepository;
@@ -28,6 +29,8 @@ public class AdminTransportService {
     UserService userService;
     @Autowired
     MapperUtils mapperUtils;
+    @Autowired
+    AdminRentService rentService;
 
     public List<Transport> getTransport(int start, int count) {
         Pageable pageable = PageRequest.of(0, count + start, Sort.by(Sort.Order.asc("id")));
@@ -74,9 +77,10 @@ public class AdminTransportService {
     }
 
     public void deleteTransport(long id) {
-        if(transportRepository.getTransportById(id).isEmpty())
-            throw new NotFoundException("Транспорт не найден");
-        Transport transport = transportRepository.getTransportById(id).get();
+        Transport transport = getTransport(id);
+        for(Rent rent : transport.getRents()) {
+            rentService.deleteRent(rent.getId());
+        }
         transportRepository.delete(transport);
     }
 }

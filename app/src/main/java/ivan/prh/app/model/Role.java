@@ -1,9 +1,9 @@
 package ivan.prh.app.model;
 
-import jakarta.persistence.*;
 import lombok.Data;
 
 import javax.annotation.processing.Generated;
+import javax.persistence.*;
 
 @Entity
 @Data

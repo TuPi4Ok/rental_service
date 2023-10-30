@@ -1,62 +1,89 @@
 package ivan.prh.app.controller;
 
+import io.swagger.annotations.*;
 import ivan.prh.app.model.Rent;
 import ivan.prh.app.service.RentService;
 import ivan.prh.app.service.TransportService;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.constraints.Pattern;
 
 @RestController
 @RequestMapping("/Rent")
 @Validated
+@Api(value = "RentController", description = "Контроллер для управления арендой")
 public class RentController extends BaseController {
     @Autowired
     RentService rentService;
     @Autowired
     TransportService transportService;
+    @ApiOperation(value = "Получение информации об аренде по id", response = Rent.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Успешно"),
+            @ApiResponse(code = 401, message = "Неправильный логин или пароль"),
+            @ApiResponse(code = 403, message = "Недостаточно прав"),
+            @ApiResponse(code = 404, message = "Аренда не найдена")
+    })
     @GetMapping("/{rentId}")
-    public ResponseEntity<?> getRentById(@PathVariable("rentId") long id) {
+    public ResponseEntity<?> getRentById(@ApiParam(value = "id аренды", required = true) @PathVariable("rentId") long id) {
         return ResponseEntity.ok(rentService.getRent(id));
     }
-
+    @ApiOperation(value = "Получение списка аренда пользователя", response = Rent.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Успешно"),
+            @ApiResponse(code = 401, message = "Неправильный логин или пароль"),
+            @ApiResponse(code = 403, message = "Недостаточно прав"),
+            @ApiResponse(code = 404, message = "Аренда не найдена")
+    })
     @GetMapping("/MyHistory")
     public ResponseEntity<?> getRentHistory() {
         return ResponseEntity.ok(rentService.getRentHistory());
     }
 
+    @ApiOperation(value = "Получение списка аренда у транспорта по его id", response = Rent.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Успешно"),
+            @ApiResponse(code = 401, message = "Неправильный логин или пароль"),
+            @ApiResponse(code = 403, message = "Недостаточно прав"),
+            @ApiResponse(code = 404, message = "Аренда не найдена")
+    })
     @GetMapping("/TransportHistory/{transportId}")
-    public ResponseEntity<?> getRentTransportHistory(@PathVariable("transportId") long id) {
+    public ResponseEntity<?> getRentTransportHistory(@ApiParam(value = "id аренды", required = true) @PathVariable("transportId") long id) {
         return ResponseEntity.ok(rentService.getRentTransportHistory(id));
     }
 
     @PostMapping("/New/{transportId}")
-    public ResponseEntity<?> createRent(@PathVariable("transportId") long id,
-                                        @Pattern(regexp = "^(Minutes|Days)$", message = "Введен неверный тип аренды")
+    public ResponseEntity<?> createRent(@ApiParam(value = "Id транспорта", required = true) @PathVariable("transportId") long id,
+                                        @ApiParam(value = "Тип аренды [Minutes, Days]", required = true) @Pattern(regexp = "^(Minutes|Days)$", message = "Введен неверный тип аренды")
                                         @RequestParam("rentType") String rentType) {
         return ResponseEntity.ok(rentService.createRent(id, rentType));
     }
-
+    @ApiOperation(value = "Создание аренды", response = Rent.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Успешно"),
+            @ApiResponse(code = 401, message = "Неправильный логин или пароль"),
+            @ApiResponse(code = 403, message = "Недостаточно прав"),
+            @ApiResponse(code = 404, message = "Аренда не найдена")
+    })
     @PostMapping("/End/{rentId}")
     public ResponseEntity<?> endRent(
-            @PathVariable("rentId") long id,
-            @RequestParam("lat") double lat,
-            @RequestParam("long") double longitude) {
+          @ApiParam(value = "Id аренды", required = true) @PathVariable("rentId") long id,
+          @ApiParam(value = "Широта", required = true) @RequestParam("lat") double lat,
+          @ApiParam(value = "Долгота", required = true) @RequestParam("long") double longitude) {
         return ResponseEntity.ok(rentService.endRent(id, lat, longitude));
     }
 
+    
     @GetMapping("/Transport")
     public ResponseEntity<?> getRentByParam(
-            @RequestParam("lat") double lat,
-            @RequestParam("long") double longitude,
-            @RequestParam("radius") double radius,
-            @Pattern(regexp = "^(Car|Bike|Scooter|All)$", message = "Введен неверный тип транспорта")
-            @RequestParam("type") String type) {
+            @ApiParam(value = "Широта", required = true) @RequestParam("lat") double lat,
+            @ApiParam(value = "Долгота", required = true) @RequestParam("long") double longitude,
+            @ApiParam(value = "Радиус круга поиска транспорта", required = true) @RequestParam("radius") double radius,
+            @ApiParam(value = "Тип транспорта [Car, Bike, Scooter, All]", required = true)
+            @Pattern(regexp = "^(Car|Bike|Scooter|All)$", message = "Введен неверный тип транспорта") @RequestParam("type") String type) {
         return ResponseEntity.ok(transportService.getTransportCanBeRented(lat, longitude, radius, type));
     }
 }

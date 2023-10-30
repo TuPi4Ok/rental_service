@@ -1,10 +1,10 @@
 package ivan.prh.app.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.annotation.Nullable;
-import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.lang.Nullable;
 
+import javax.persistence.*;
 import java.util.Collection;
 
 @Data

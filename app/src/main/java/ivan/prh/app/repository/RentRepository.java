@@ -3,7 +3,6 @@ package ivan.prh.app.repository;
 import ivan.prh.app.model.Rent;
 import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
-import liquibase.change.core.LoadDataChange;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

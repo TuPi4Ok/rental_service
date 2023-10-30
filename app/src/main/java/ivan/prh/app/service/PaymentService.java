@@ -3,6 +3,7 @@ package ivan.prh.app.service;
 import ivan.prh.app.config.DataLoader;
 import ivan.prh.app.exception.ForbiddenException;
 import ivan.prh.app.exception.NotFoundException;
+import ivan.prh.app.model.Rent;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,12 @@ public class PaymentService {
         User user = userService.findById(id);
         double overflow = 250000;
         user.setBalance(user.getBalance() + overflow);
+        accountRepository.save(user);
+    }
+
+    public void takeDownBalance(Rent rent) {
+        User user = rent.getUser();
+        user.setBalance(user.getBalance() - rent.getFinalPrice());
         accountRepository.save(user);
     }
 }

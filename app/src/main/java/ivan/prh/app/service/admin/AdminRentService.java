@@ -6,12 +6,13 @@ import ivan.prh.app.model.Rent;
 import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.RentRepository;
+import ivan.prh.app.service.PaymentService;
 import ivan.prh.app.service.RentService;
 import ivan.prh.app.service.TransportService;
 import ivan.prh.app.service.UserService;
 import ivan.prh.app.util.MapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -31,6 +32,8 @@ public class AdminRentService {
     MapperUtils mapperUtils;
     @Autowired
     RentService rentService;
+    @Autowired
+    PaymentService paymentService;
 
     public Rent getRent(long id) {
         if(!rentRepository.existsById(id))
@@ -55,7 +58,6 @@ public class AdminRentService {
     public Rent createRent(RentDtoRequest rentDtoRequest) {
         Rent rent = new Rent();
         rent = mapperUtils.rentDtoToRent(rentDtoRequest, rent);
-
         Transport transport = transportService.findTransportById(rentDtoRequest.getTransportId());
         if(rent.getTimeEnd() != null) {
             transport.setCanBeRented(false);
@@ -65,7 +67,7 @@ public class AdminRentService {
             transport.setCanBeRented(true);
         }
         if (userService.getCurrentUser().equals(transport.getUser()))
-            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Нельзя арендовать собственный транспорт");
+            throw new ResponseStatusException(HttpStatus.valueOf(400), "Нельзя арендовать собственный транспорт");
         rent.setUser(userService.getCurrentUser());
         rentRepository.save(rent);
         return rent;
@@ -73,12 +75,12 @@ public class AdminRentService {
 
     public Rent endRent(long id, double lat, double longitude) {
         Rent rent = getRent(id);
-
         transportService.changeCanBeRented(rent.getTransport(), true);
         transportService.changeCoordinates(rent.getTransport(), lat, longitude);
 
         rent.setTimeEnd(LocalDateTime.now());
         rent.setFinalPrice(rentService.getCostRent(rent));
+        paymentService.takeDownBalance(rent);
         rentRepository.save(rent);
         return rent;
     }

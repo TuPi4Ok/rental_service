@@ -7,7 +7,7 @@ import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.RentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,6 +24,8 @@ public class RentService {
     UserService userService;
     @Autowired
     TransportService transportService;
+    @Autowired
+    PaymentService paymentService;
     public Rent getRent(long id) {
         if(rentRepository.getRentById(id).isEmpty())
             throw new NotFoundException("Аренда не найдена");
@@ -56,13 +58,15 @@ public class RentService {
 
         Transport transport = transportService.findTransportById(id);
         if(!transport.isCanBeRented())
-            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Транспорт уже арендован");
+            throw new ResponseStatusException(HttpStatus.valueOf(400), "Транспорт уже арендован");
         transport.setCanBeRented(false);
         rent.setTransport(transport);
 
         if (userService.getCurrentUser().equals(transport.getUser()))
-            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Нельзя арендовать собственный транспорт");
+            throw new ResponseStatusException(HttpStatus.valueOf(400), "Нельзя арендовать собственный транспорт");
         rent.setUser(userService.getCurrentUser());
+        if (rent.getUser().getBalance() < 0)
+            throw new ResponseStatusException(HttpStatus.valueOf(400), "Баланс уже находится в минусе!");
 
         rent.setPriceType(rentType);
         rent.setPrice();
@@ -78,13 +82,14 @@ public class RentService {
         if (!userService.getCurrentUser().equals(rent.getUser()))
             throw new ForbiddenException("Недостаточно прав");
         if (rent.getTimeEnd() != null)
-            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Аренда уже завершена");
+            throw new ResponseStatusException(HttpStatus.valueOf(400), "Аренда уже завершена");
 
         transportService.changeCanBeRented(rent.getTransport(), true);
         transportService.changeCoordinates(rent.getTransport(), lat, longitude);
 
         rent.setTimeEnd(LocalDateTime.now());
         rent.setFinalPrice(getCostRent(rent));
+        paymentService.takeDownBalance(rent);
         rentRepository.save(rent);
         return "Аренда завершена";
     }

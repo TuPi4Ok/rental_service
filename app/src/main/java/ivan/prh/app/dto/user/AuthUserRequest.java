@@ -1,7 +1,8 @@
 package ivan.prh.app.dto.user;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+
+import javax.validation.constraints.NotNull;
 
 @Data
 public class AuthUserRequest {

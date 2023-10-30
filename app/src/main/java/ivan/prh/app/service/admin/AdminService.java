@@ -2,6 +2,7 @@ package ivan.prh.app.service.admin;
 
 import ivan.prh.app.dto.admin.AdminRequest;
 import ivan.prh.app.exception.NotFoundException;
+import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.AccountRepository;
 import ivan.prh.app.service.RoleService;
@@ -10,7 +11,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,6 +30,8 @@ public class AdminService {
     PasswordEncoder passwordEncoder;
     @Autowired
     RoleService roleService;
+    @Autowired
+    AdminTransportService transportService;
 
      public List<User> getAllUsersWithParam(int start, int count) {
          Pageable pageable = PageRequest.of(0, count + start, Sort.by(Sort.Order.asc("id")));
@@ -58,7 +61,7 @@ public class AdminService {
 
     public User createUser(AdminRequest adminRequest) {
          if(accountRepository.findUserByUserName(adminRequest.getUsername()).isPresent())
-             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Имя пользователя уже занято");
+             throw new ResponseStatusException(HttpStatus.valueOf(400), "Имя пользователя уже занято");
 
          User user = new User();
          user.setUserName(adminRequest.getUsername());
@@ -74,7 +77,10 @@ public class AdminService {
 
     public void deleteUser(long id) {
          if (accountRepository.findUserById(id).isPresent()) {
-             accountRepository.delete(accountRepository.findUserById(id).get());
+             User user = accountRepository.findUserById(id).get();
+             for(Transport transport : user.getTransports()) {
+                 transportService.deleteTransport(transport.getId());
+             }
          }
          else {
              throw new NotFoundException("Пользователь не найден");
@@ -83,7 +89,7 @@ public class AdminService {
 
     public User updateUser(long id, AdminRequest adminRequest) {
          if(accountRepository.findUserByUserName(adminRequest.getUsername()).isPresent())
-             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Имя пользователя уже занято");
+             throw new ResponseStatusException(HttpStatus.valueOf(400), "Имя пользователя уже занято");
 
          if(accountRepository.findUserById(id).isEmpty())
              throw new NotFoundException("Пользователи не найдены");
