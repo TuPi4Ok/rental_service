@@ -16,7 +16,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Build with Gradle
-        uses: app/gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v2
         with:
           arguments: build
           build-root-directory: app
