@@ -4,17 +4,14 @@ import ivan.prh.app.dto.transport.AdminTransportDto;
 import ivan.prh.app.exception.NotFoundException;
 import ivan.prh.app.model.Rent;
 import ivan.prh.app.model.Transport;
-import ivan.prh.app.model.User;
 import ivan.prh.app.repository.TransportRepository;
 import ivan.prh.app.service.UserService;
-import ivan.prh.app.util.MapperUtils;
+import ivan.prh.app.util.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +25,7 @@ public class AdminTransportService {
     @Autowired
     UserService userService;
     @Autowired
-    MapperUtils mapperUtils;
+    Mapper mapper;
     @Autowired
     AdminRentService rentService;
 
@@ -58,7 +55,7 @@ public class AdminTransportService {
 
     public Transport createTransport(AdminTransportDto transportDto) {
         Transport transport = new Transport();
-        mapperUtils.transportDtoToTransport(transportDto, transport);
+        mapper.map(transportDto);
 
         userService.findById(transportDto.getOwnerId());
         transport.setUser(userService.findById(transportDto.getOwnerId()));
@@ -70,7 +67,7 @@ public class AdminTransportService {
         if(transportRepository.getTransportById(id).isEmpty())
             throw new NotFoundException("Транспорт с таким id не найден");
         Transport transport = transportRepository.getTransportById(id).get();
-        transport = mapperUtils.transportDtoToTransport(transportDto, transport);
+        transport = mapper.update(transportDto, transport);
         userService.findById(transportDto.getOwnerId());
         transport.setUser(userService.findById(transportDto.getOwnerId()));
         return transportRepository.save(transport);

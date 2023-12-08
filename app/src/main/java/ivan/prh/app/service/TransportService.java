@@ -6,9 +6,8 @@ import ivan.prh.app.exception.NotFoundException;
 import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.TransportRepository;
-import ivan.prh.app.util.MapperUtils;
+import ivan.prh.app.util.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ public class TransportService {
     UserService userService;
 
     @Autowired
-    MapperUtils mapperUtils;
+    Mapper mapper;
 
 
     public Transport findTransportById(long id) {
@@ -40,8 +39,7 @@ public class TransportService {
     }
 
     public Transport createTransport(TransportDto transportDto) {
-        Transport transport = new Transport();
-        transport = mapperUtils.transportDtoToTransport(transportDto, transport);
+        Transport transport = mapper.map(transportDto);
 
         User user = userService.getCurrentUser();
         transport.setUser(user);
@@ -54,7 +52,7 @@ public class TransportService {
         if (user.getId() != transport.getUser().getId())
             throw new ForbiddenException("Недостаточно прав");
 
-        transport = mapperUtils.transportDtoToTransport(transportDto, transport);
+        transport = mapper.update(transportDto, transport);
 
         return transportRepository.save(transport);
     }

@@ -10,7 +10,7 @@ import ivan.prh.app.service.PaymentService;
 import ivan.prh.app.service.RentService;
 import ivan.prh.app.service.TransportService;
 import ivan.prh.app.service.UserService;
-import ivan.prh.app.util.MapperUtils;
+import ivan.prh.app.util.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class AdminRentService {
     @Autowired
     TransportService transportService;
     @Autowired
-    MapperUtils mapperUtils;
+    Mapper mapper;
     @Autowired
     RentService rentService;
     @Autowired
@@ -56,8 +56,7 @@ public class AdminRentService {
     }
 
     public Rent createRent(RentDtoRequest rentDtoRequest) {
-        Rent rent = new Rent();
-        rent = mapperUtils.rentDtoToRent(rentDtoRequest, rent);
+        var rent = mapper.map(rentDtoRequest);
         Transport transport = transportService.findTransportById(rentDtoRequest.getTransportId());
         if(rent.getTimeEnd() != null) {
             transport.setCanBeRented(false);
@@ -87,7 +86,7 @@ public class AdminRentService {
 
     public Rent updateRent(long id, RentDtoRequest rentDtoRequest) {
         Rent rent = getRent(id);
-        rent = mapperUtils.rentDtoToRent(rentDtoRequest, rent);
+        rent = mapper.update(rentDtoRequest, rent);
         rent.setUser(userService.findById(rentDtoRequest.getUserId()));
 
         Transport transport = transportService.findTransportById(rentDtoRequest.getTransportId());
