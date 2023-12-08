@@ -81,14 +81,14 @@ class UserAccountControllerTest {
 	}
 
 	@Test
-	void testCreateAuthToken() throws Exception {
+	void testCreateAuthTokenPositive() throws Exception {
 		var token = getAuthToken();
 		assertThat(jwtTokenUtils.getUsername(token)).isEqualTo(user.getUserName());
 	}
 
 
 	@Test
-	void testCreateNewUser() throws Exception {
+	void testCreateNewUserPositive() throws Exception {
 		var user = createUser();
 
 		var data = new HashMap<>();
@@ -110,7 +110,7 @@ class UserAccountControllerTest {
 		assertThat(newUser.getRoles()).isEqualTo(user.getRoles());
 	}
 	@Test
-	void testGetUser() throws Exception {
+	void testGetUserPositive() throws Exception {
 		var token = getAuthToken();
 
 		var request = get("/Account/Me")
@@ -127,7 +127,7 @@ class UserAccountControllerTest {
 	}
 
 	@Test
-	void testUpdateUser() throws Exception {
+	void testUpdateUserPositive() throws Exception {
 		var token = getAuthToken();
 
 		var data = new HashMap<>();
@@ -151,7 +151,7 @@ class UserAccountControllerTest {
 	}
 
 	@Test
-	void testSignOutUser() throws Exception {
+	void testSignOutUserPositive() throws Exception {
 		var token = getAuthToken();
 
 		var request = post("/Account/SignOut")
@@ -166,4 +166,75 @@ class UserAccountControllerTest {
 		mockMvc.perform(request1)
 				.andExpect(status().is(401));
 	}
+
+	@Test
+	void testCreateAuthTokenNegative() throws Exception {
+		var data = new HashMap<>();
+		data.put("username", user.getUserName() + "123");
+		data.put("password", user.getPassword());
+
+		var request = post("/Account/SignIn")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(om.writeValueAsString(data));
+
+		mockMvc.perform(request)
+				.andExpect(status().isBadRequest());
+
+	}
+
+	@Test
+	void testCreateNewUserNegative() throws Exception {
+
+		var data = new HashMap<>();
+		data.put("username", user.getUserName());
+		data.put("password", user.getPassword());
+
+		var request = post("/Account/SignUp")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(om.writeValueAsString(data));
+
+		var result = mockMvc.perform(request)
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		var message = result.getResponse().getErrorMessage();
+
+		assertThat(message).isEqualTo("Имя пользователя уже занято");
+	}
+
+	@Test
+	void testGetUserNegative() throws Exception {
+		var token = getAuthToken();
+
+		var request = get("/Account/Me")
+				.header("Authorization", "Bearer " + token + "123");
+
+		mockMvc.perform(request)
+				.andExpect(status().isUnauthorized());
+
+	}
+
+	@Test
+	void testUpdateUserNegative() throws Exception {
+		var token = getAuthToken();
+
+		var data = new HashMap<>();
+		var newUserName = user.getUserName();
+		data.put("username", newUserName);
+		data.put("password", user.getPassword());
+
+		var request = put("/Account/Update")
+				.header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(om.writeValueAsString(data));
+
+		var result = mockMvc.perform(request)
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		var message = result.getResponse().getErrorMessage();
+
+		assertThat(message).isEqualTo("Имя пользователя уже занято");
+	}
+
 }
