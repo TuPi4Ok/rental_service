@@ -3,6 +3,7 @@ package ivan.prh.app.controller;
 import io.swagger.annotations.*;
 import ivan.prh.app.dto.transport.TransportDto;
 import ivan.prh.app.model.Rent;
+import ivan.prh.app.model.Transport;
 import ivan.prh.app.service.TransportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +27,8 @@ public class TransportController extends BaseController{
             @ApiResponse(code = 404, message = "Транспорт не найден")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<?> getTransport(@ApiParam(value = "Id транспорта", required = true) @Valid @PathVariable("id") long id) {
-        return ResponseEntity.ok(transportService.getTransport(id));
+    public Transport getTransport(@ApiParam(value = "Id транспорта", required = true) @Valid @PathVariable("id") long id) {
+        return transportService.getTransport(id);
     }
     @ApiOperation(value = "Создание транспорта", response = Rent.class)
     @ApiResponses(value = {
@@ -37,8 +38,8 @@ public class TransportController extends BaseController{
             @ApiResponse(code = 404, message = "Транспорт не найден")
     })
     @PostMapping("")
-    public ResponseEntity<?> createTransport(@Valid @RequestBody TransportDto transportDto) {
-        return ResponseEntity.ok(transportService.createTransport(transportDto));
+    public Transport createTransport(@Valid @RequestBody TransportDto transportDto) {
+        return transportService.createTransport(transportDto);
     }
     @ApiOperation(value = "Обновление транспорта по Id", response = Rent.class)
     @ApiResponses(value = {

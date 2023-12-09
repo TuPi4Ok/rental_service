@@ -1,7 +1,9 @@
 package ivan.prh.app.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
@@ -9,6 +11,8 @@ import java.util.Collection;
 
 @Data
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class Transport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

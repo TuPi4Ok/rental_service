@@ -3,6 +3,7 @@ package ivan.prh.app;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ivan.prh.app.config.DataLoader;
 import ivan.prh.app.dto.user.UserDto;
+import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.AccountRepository;
 import ivan.prh.app.util.JwtTokenUtils;
@@ -72,12 +73,13 @@ class UserAccountControllerTest {
         return om.readValue(body, Map.class).get("token").toString();
 	}
 	private User createUser() {
-		return user = Instancio.of(User.class)
+		var user = Instancio.of(User.class)
 				.ignore(Select.field(User::getId))
 				.supply(Select.field(User::getRoles), () -> List.of(dataLoader.getRoleUser()))
 				.supply(Select.field(User::getRents), () -> List.of())
 				.supply(Select.field(User::getTransports), () -> List.of())
 				.create();
+		return user;
 	}
 
 	@Test

@@ -19,8 +19,8 @@ import org.mapstruct.ReportingPolicy;
 public abstract class Mapper {
     public abstract UserDto map(User model);
     public abstract Transport map(TransportDto model);
+    public abstract TransportDto map(Transport model);
     public abstract Rent map(RentDtoRequest model);
-
     public abstract Transport update(TransportDto dto, @MappingTarget Transport model);
     public abstract Rent update(RentDtoRequest dto, @MappingTarget Rent model);
 }
