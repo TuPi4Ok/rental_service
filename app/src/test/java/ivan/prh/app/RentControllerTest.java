@@ -2,10 +2,14 @@ package ivan.prh.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ivan.prh.app.config.DataLoader;
+import ivan.prh.app.model.Rent;
 import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.AccountRepository;
+import ivan.prh.app.repository.RentRepository;
 import ivan.prh.app.repository.TransportRepository;
+import ivan.prh.app.service.RentService;
+import ivan.prh.app.util.JwtTokenUtils;
 import ivan.prh.app.util.Mapper;
 import org.instancio.Instancio;
 import org.instancio.Select;
@@ -21,14 +25,16 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class TransportControllerTest {
+public class RentControllerTest {
     @Autowired
     BCryptPasswordEncoder passwordEncoder;
     @Autowired
@@ -42,9 +48,10 @@ public class TransportControllerTest {
     @Autowired
     AccountRepository accountRepository;
     @Autowired
-    Mapper mapper;
+    RentRepository rentRepository;
     Transport transport;
     User user;
+    Rent rent;
     @BeforeEach
     void beforeEach() {
         user = createUser();
@@ -54,6 +61,7 @@ public class TransportControllerTest {
         user.setPassword(notEncodePassword);
 
         transport = transportRepository.save(createTransport());
+        rent = rentRepository.save(createRent());
     }
 
     private Transport createTransport() {
@@ -75,6 +83,15 @@ public class TransportControllerTest {
         return user;
     }
 
+    private Rent createRent() {
+        var rent = Instancio.of(Rent.class)
+                .ignore(Select.field(Rent::getId))
+                .supply(Select.field(Rent::getUser), () -> user)
+                .supply(Select.field(Rent::getTransport), () -> transport)
+                .supply(Select.field(Rent::getPriceType), () -> "Minutes")
+                .create();
+        return rent;
+    }
 
     private String getAuthToken() throws Exception {
         var data = new HashMap<>();
@@ -95,123 +112,63 @@ public class TransportControllerTest {
     }
 
     @Test
-    void testGetTransportPositive() throws Exception {
-
-        var request = get("/Transport/" + transport.getId());
-
-        var result = mockMvc.perform(request)
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var body = result.getResponse().getContentAsString();
-        var resultTransport = om.readValue(body, Transport.class);
-
-        assertThat(resultTransport.getId()).isEqualTo(transport.getId());
-    }
-
-    @Test
-    void testCreateTransportPositive() throws Exception {
-        Transport newTransport = createTransport();
+    void testGetRentByIdPositive() throws Exception {
         var token = getAuthToken();
 
-        var request = post("/Transport")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(mapper.map(newTransport)));
-
-        var result = mockMvc.perform(request)
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var body = result.getResponse().getContentAsString();
-        var resultTransport = om.readValue(body, Transport.class);
-
-        assertThat(resultTransport.getModel()).isEqualTo(newTransport.getModel());
-    }
-
-    @Test
-    void testUpdateTransportPositive() throws Exception {
-        Transport newTransport = createTransport();
-        var token = getAuthToken();
-
-        var request = put("/Transport/" + transport.getId())
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(mapper.map(newTransport)));
-
-        var result = mockMvc.perform(request)
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var body = result.getResponse().getContentAsString();
-        var resultTransport = om.readValue(body, Transport.class);
-
-        assertThat(resultTransport.getModel()).isEqualTo(newTransport.getModel());
-        assertThat(transportRepository.getTransportById(transport.getId()).get().getModel())
-                .isEqualTo(newTransport.getModel());
-    }
-
-    @Test
-    void testDeleteTransportPositive() throws Exception {
-        var token = getAuthToken();
-
-        var request = delete("/Transport/" + transport.getId())
-                .header("Authorization", "Bearer " + token);
-
-        mockMvc.perform(request)
-                .andExpect(status().isOk());
-        assertThat(transportRepository.getTransportById(transport.getId()).isPresent()).isFalse();
-    }
-
-    @Test
-    void testGetTransportNegative() throws Exception {
-
-        var request = get("/Transport/0");
-
-        var result = mockMvc.perform(request)
-                .andExpect(status().isNotFound())
-                .andReturn();
-
-        var message = result.getResponse().getErrorMessage();
-
-        assertThat(message).isEqualTo("Транспорт с данным id не найден");
-    }
-
-    @Test
-    void testUpdateTransportNegative() throws Exception {
-        Transport newTransport = createTransport();
-        var id = transport.getId();
-        beforeEach();
-        var token = getAuthToken();
-
-        var request = put("/Transport/" + id)
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(mapper.map(newTransport)));
-
-        var result = mockMvc.perform(request)
-                .andExpect(status().isForbidden())
-                .andReturn();
-
-        var message = result.getResponse().getErrorMessage();
-
-        assertThat(message).isEqualTo("Недостаточно прав");
-    }
-
-    @Test
-    void testDeleteTransportNegative() throws Exception {
-        var token = getAuthToken();
-
-        var request = delete("/Transport/0")
+        var request = get("/Rent/" + rent.getId())
                 .header("Authorization", "Bearer " + token);
 
         var result = mockMvc.perform(request)
-                .andExpect(status().isNotFound())
+                .andExpect(status().isOk())
                 .andReturn();
 
-        var message = result.getResponse().getErrorMessage();
+        var body = result.getResponse().getContentAsString();
+        var resultRent = om.readValue(body, Rent.class);
 
-        assertThat(message).isEqualTo("Транспорт с данным id не найден");
-        assertThat(transportRepository.getTransportById(transport.getId()).isPresent()).isTrue();
+        assertThat(resultRent.getId()).isEqualTo(rent.getId());
+    }
+
+    @Test
+    void testGetRentHistoryPositive() throws Exception {
+        var token = getAuthToken();
+
+        var request = get("/Rent/MyHistory")
+                .header("Authorization", "Bearer " + token);
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+        List<Map<String, Object>> resultRent = om.readValue(body, List.class);
+
+        assertThat(om.convertValue(resultRent.get(0), Rent.class).getId()).isEqualTo(rent.getId());
+    }
+
+    @Test
+    void testCreateRentPositive() throws Exception {
+        var user = createUser();
+        var notEncodePassword = user.getPassword();
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        accountRepository.save(user);
+        user.setPassword(notEncodePassword);
+        var transport = createTransport();
+        transport.setRents(null);
+        transport.setCanBeRented(true);
+        transport.setUser(user);
+        transportRepository.save(transport);
+        var token = getAuthToken();
+
+        var request = post("/Rent/New/" + transport.getId() + "?rentType=Minutes")
+                .header("Authorization", "Bearer " + token);
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+        var resultRent = om.readValue(body, Rent.class);
+
+        assertThat(rentRepository.getRentById(resultRent.getId()).isPresent()).isTrue();
     }
 }

@@ -51,7 +51,7 @@ public class RentService {
         return rentRepository.getRentsByTransport(transport);
     }
 
-    public String createRent(long id, String rentType) {
+    public Rent createRent(long id, String rentType) {
         Rent rent = new Rent();
 
         Transport transport = transportService.findTransportById(id);
@@ -69,8 +69,7 @@ public class RentService {
         rent.setPriceType(rentType);
         rent.setPrice();
         rent.setTimeStart(LocalDateTime.now());
-        rentRepository.save(rent);
-        return "Аренда начата";
+        return rentRepository.save(rent);
     }
 
     public String endRent(long id, double lat, double longitude) {
