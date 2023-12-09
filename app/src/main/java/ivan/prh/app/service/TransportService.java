@@ -1,14 +1,14 @@
 package ivan.prh.app.service;
 
 import ivan.prh.app.dto.transport.TransportDto;
-import ivan.prh.app.exception.ForbiddenException;
-import ivan.prh.app.exception.NotFoundException;
 import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.TransportRepository;
 import ivan.prh.app.util.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,15 +27,13 @@ public class TransportService {
 
     public Transport findTransportById(long id) {
         if(!transportRepository.existsById(id)) {
-            throw new NotFoundException("Транспорт с данным id не найден");
+            throw new ResponseStatusException(HttpStatus.valueOf(404),"Транспорт с данным id не найден");
         }
         return transportRepository.getTransportById(id).get();
     }
 
     public Transport getTransport(long id) {
-        if(transportRepository.getTransportById(id).isEmpty())
-            throw new NotFoundException("Транспорт не найден");
-        return transportRepository.getTransportById(id).get();
+        return findTransportById(id);
     }
 
     public Transport createTransport(TransportDto transportDto) {
@@ -47,10 +45,10 @@ public class TransportService {
     }
 
     public Transport updateTransport(long id, TransportDto transportDto) {
-        Transport transport = getTransport(id);
+        Transport transport = findTransportById(id);
         User user = userService.getCurrentUser();
         if (user.getId() != transport.getUser().getId())
-            throw new ForbiddenException("Недостаточно прав");
+            throw new ResponseStatusException(HttpStatus.valueOf(403),"Недостаточно прав");
 
         transport = mapper.update(transportDto, transport);
 
@@ -61,7 +59,7 @@ public class TransportService {
         Transport transport = getTransport(id);
         User user = userService.getCurrentUser();
         if (user.getId() != transport.getUser().getId())
-            throw new ForbiddenException("Недостаточно прав");
+            throw new ResponseStatusException(HttpStatus.valueOf(403),"Недостаточно прав");
         transportRepository.delete(transport);
     }
 
@@ -90,7 +88,7 @@ public class TransportService {
         }
 
         if(result.isEmpty())
-            throw new NotFoundException("Транспорт в данном радиусе не найден");
+            throw new ResponseStatusException(HttpStatus.valueOf(404), "Транспорт в данном радиусе не найден");
         return result;
     }
 }

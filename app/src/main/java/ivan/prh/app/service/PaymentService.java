@@ -1,15 +1,15 @@
 package ivan.prh.app.service;
 
 import ivan.prh.app.config.DataLoader;
-import ivan.prh.app.exception.ForbiddenException;
-import ivan.prh.app.exception.NotFoundException;
 import ivan.prh.app.model.Rent;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class PaymentService {
@@ -27,7 +27,7 @@ public class PaymentService {
         } else if (user.getRoles().contains(dataLoader.getRoleUser()) && id == user.getId()) {
             overflow(id);
         } else {
-            throw new ForbiddenException("Недостаточно прав");
+            throw new ResponseStatusException(HttpStatus.valueOf(403), "Недостаточно прав");
         }
 
     }

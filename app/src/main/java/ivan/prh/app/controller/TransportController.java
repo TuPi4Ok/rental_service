@@ -49,9 +49,9 @@ public class TransportController extends BaseController{
             @ApiResponse(code = 404, message = "Транспорт не найден")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateTransport(
+    public Transport updateTransport(
             @ApiParam(value = "Id транспорта", required = true) @Valid @PathVariable("id") long id, @RequestBody TransportDto transportDto) {
-        return ResponseEntity.ok(transportService.updateTransport(id, transportDto));
+        return transportService.updateTransport(id, transportDto);
     }
     @ApiOperation(value = "Удаление транспорта по Id", response = Rent.class)
     @ApiResponses(value = {

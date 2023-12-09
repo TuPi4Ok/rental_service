@@ -1,7 +1,6 @@
 package ivan.prh.app.service.admin;
 
 import ivan.prh.app.dto.rent.RentDtoRequest;
-import ivan.prh.app.exception.NotFoundException;
 import ivan.prh.app.model.Rent;
 import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
@@ -37,21 +36,21 @@ public class AdminRentService {
 
     public Rent getRent(long id) {
         if(!rentRepository.existsById(id))
-            throw new NotFoundException("Аренда с таки id не найдена");
+            throw new ResponseStatusException(HttpStatus.valueOf(404), "Аренда с таки id не найдена");
         return rentRepository.getRentById(id).get();
     }
 
     public List<Rent> getHistory(long userId) {
         User user = userService.findById(userId);
         if(rentRepository.getRentsByUser(user).isEmpty())
-            throw new NotFoundException("Аренды у пользователя не найдены");
+            throw new ResponseStatusException(HttpStatus.valueOf(404), "Аренды у пользователя не найдены");
         return rentRepository.getRentsByUser(user);
     }
 
     public List<Rent> getRentTransportHistory(long id) {
         Transport transport = transportService.findTransportById(id);
         if(rentRepository.getRentsByTransport(transport).isEmpty())
-            throw new NotFoundException("Аренды не найдены");
+            throw new ResponseStatusException(HttpStatus.valueOf(404), "Аренды не найдены");
         return rentRepository.getRentsByTransport(transport);
     }
 

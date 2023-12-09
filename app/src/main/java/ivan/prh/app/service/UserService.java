@@ -1,7 +1,6 @@
 package ivan.prh.app.service;
 
 import ivan.prh.app.dto.user.AuthUserRequest;
-import ivan.prh.app.exception.NotFoundException;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.AccountRepository;
 import ivan.prh.app.util.JwtTokenUtils;
@@ -91,7 +90,7 @@ public class UserService implements UserDetailsService {
 
     public User findById(long id) {
         if (!accountRepository.existsById(id))
-            throw new NotFoundException("Пользователь не найден");
+            throw new ResponseStatusException(HttpStatus.valueOf(404), "Пользователь не найден");
         return accountRepository.findUserById(id).get();
     }
 

@@ -1,7 +1,6 @@
 package ivan.prh.app.service.admin;
 
 import ivan.prh.app.dto.transport.AdminTransportDto;
-import ivan.prh.app.exception.NotFoundException;
 import ivan.prh.app.model.Rent;
 import ivan.prh.app.model.Transport;
 import ivan.prh.app.repository.TransportRepository;
@@ -11,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,14 +43,14 @@ public class AdminTransportService {
         }
 
         if (resultTransport.isEmpty())
-            throw new NotFoundException("Транспорты не найдены");
+            throw new ResponseStatusException(HttpStatus.valueOf(404), "Транспорты не найдены");
         else
             return resultTransport;
     }
 
     public Transport getTransport(long id) {
         if(transportRepository.getTransportById(id).isEmpty())
-            throw new NotFoundException("Транспорт не найден");
+            throw new ResponseStatusException(HttpStatus.valueOf(404), "Транспорт не найден");
         return transportRepository.getTransportById(id).get();
     }
 
@@ -65,7 +66,7 @@ public class AdminTransportService {
 
     public Transport updateTransport(long id, AdminTransportDto transportDto) {
         if(transportRepository.getTransportById(id).isEmpty())
-            throw new NotFoundException("Транспорт с таким id не найден");
+            throw new ResponseStatusException(HttpStatus.valueOf(404), "Транспорт с таким id не найден");
         Transport transport = transportRepository.getTransportById(id).get();
         transport = mapper.update(transportDto, transport);
         userService.findById(transportDto.getOwnerId());

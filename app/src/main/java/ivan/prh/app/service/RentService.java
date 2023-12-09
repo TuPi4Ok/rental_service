@@ -1,7 +1,5 @@
 package ivan.prh.app.service;
 
-import ivan.prh.app.exception.ForbiddenException;
-import ivan.prh.app.exception.NotFoundException;
 import ivan.prh.app.model.Rent;
 import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
@@ -28,18 +26,18 @@ public class RentService {
     PaymentService paymentService;
     public Rent getRent(long id) {
         if(rentRepository.getRentById(id).isEmpty())
-            throw new NotFoundException("Аренда не найдена");
+            throw new ResponseStatusException(HttpStatus.valueOf(404), "Аренда не найдена");
         Rent rent = rentRepository.getRentById(id).get();
         User user = userService.findByUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString()).get();
         if(!(user.equals(rent.getUser()) || user.equals(rent.getTransport().getUser())))
-            throw new ForbiddenException("Недостаточно прав");
+            throw new ResponseStatusException(HttpStatus.valueOf(403), "Недостаточно прав");
         return rent;
     }
 
     public List<Rent> getRentHistory() {
         User user = userService.getCurrentUser();
         if(rentRepository.getRentsByUser(user).isEmpty())
-            throw new NotFoundException("Аренды не найдены");
+            throw new ResponseStatusException(HttpStatus.valueOf(404), "Аренды не найдены");
         return rentRepository.getRentsByUser(user);
     }
 
@@ -47,9 +45,9 @@ public class RentService {
         Transport transport = transportService.findTransportById(id);
         User user = userService.getCurrentUser();
         if(!user.equals(transport.getUser()))
-            throw new ForbiddenException("Недостаточно прав");
+            throw new ResponseStatusException(HttpStatus.valueOf(403), "Недостаточно прав");
         if(rentRepository.getRentsByTransport(transport).isEmpty())
-            throw new NotFoundException("Аренды не найдены");
+            throw new ResponseStatusException(HttpStatus.valueOf(404), "Аренды не найдены");
         return rentRepository.getRentsByTransport(transport);
     }
 
@@ -77,10 +75,10 @@ public class RentService {
 
     public String endRent(long id, double lat, double longitude) {
         if (rentRepository.getRentById(id).isEmpty())
-            throw new NotFoundException("Аренда не найдена");
+            throw new ResponseStatusException(HttpStatus.valueOf(404), "Аренда не найдена");
         Rent rent = rentRepository.getRentById(id).get();
         if (!userService.getCurrentUser().equals(rent.getUser()))
-            throw new ForbiddenException("Недостаточно прав");
+            throw new ResponseStatusException(HttpStatus.valueOf(403), "Недостаточно прав");
         if (rent.getTimeEnd() != null)
             throw new ResponseStatusException(HttpStatus.valueOf(400), "Аренда уже завершена");
 

@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -54,13 +53,13 @@ public class TransportControllerTest {
     User user;
     @BeforeEach
     void beforeEach() {
-        transport = transportRepository.save(createTransport());
-
         user = createUser();
         var notEncodePassword = user.getPassword();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         accountRepository.save(user);
         user.setPassword(notEncodePassword);
+
+        transport = transportRepository.save(createTransport());
     }
 
     private Transport createTransport() {
@@ -134,5 +133,91 @@ public class TransportControllerTest {
         var resultTransport = om.readValue(body, Transport.class);
 
         assertThat(resultTransport.getModel()).isEqualTo(newTransport.getModel());
+    }
+
+    @Test
+    void testUpdateTransportPositive() throws Exception {
+        Transport newTransport = createTransport();
+        var token = getAuthToken();
+
+        var request = put("/Transport/" + transport.getId())
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(mapper.map(newTransport)));
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+        var resultTransport = om.readValue(body, Transport.class);
+
+        assertThat(resultTransport.getModel()).isEqualTo(newTransport.getModel());
+        assertThat(transportRepository.getTransportById(transport.getId()).get().getModel())
+                .isEqualTo(newTransport.getModel());
+    }
+
+    @Test
+    void testDeleteTransportPositive() throws Exception {
+        var token = getAuthToken();
+
+        var request = delete("/Transport/" + transport.getId())
+                .header("Authorization", "Bearer " + token);
+
+        mockMvc.perform(request)
+                .andExpect(status().isOk());
+        assertThat(transportRepository.getTransportById(transport.getId()).isPresent()).isFalse();
+    }
+
+    @Test
+    void testGetTransportNegative() throws Exception {
+
+        var request = get("/Transport/0");
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andReturn();
+
+        var message = result.getResponse().getErrorMessage();
+
+        assertThat(message).isEqualTo("Транспорт с данным id не найден");
+    }
+
+    @Test
+    void testUpdateTransportNegative() throws Exception {
+        Transport newTransport = createTransport();
+        var id = transport.getId();
+        beforeEach();
+        var token = getAuthToken();
+
+        var request = put("/Transport/" + id)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(mapper.map(newTransport)));
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isForbidden())
+                .andReturn();
+
+        var message = result.getResponse().getErrorMessage();
+
+        assertThat(message).isEqualTo("Недостаточно прав");
+    }
+
+    @Test
+    void testDeleteTransportNegative() throws Exception {
+        var token = getAuthToken();
+
+        var request = delete("/Transport/0")
+                .header("Authorization", "Bearer " + token);
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andReturn();
+
+        var message = result.getResponse().getErrorMessage();
+
+        assertThat(message).isEqualTo("Транспорт с данным id не найден");
+        assertThat(transportRepository.getTransportById(transport.getId()).isPresent()).isTrue();
     }
 }

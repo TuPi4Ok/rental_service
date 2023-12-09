@@ -1,7 +1,6 @@
 package ivan.prh.app.service.admin;
 
 import ivan.prh.app.dto.admin.AdminRequest;
-import ivan.prh.app.exception.NotFoundException;
 import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.AccountRepository;
@@ -46,7 +45,7 @@ public class AdminService {
          }
 
          if (resultUser.isEmpty())
-             throw new NotFoundException("Пользователи не найдены");
+             throw new ResponseStatusException(HttpStatus.valueOf(404), "Пользователи не найдены");
          else
              return resultUser;
      }
@@ -56,7 +55,7 @@ public class AdminService {
          if (findUser.isPresent())
             return findUser.get();
          else
-             throw new NotFoundException("Пользователь не найден");
+             throw new ResponseStatusException(HttpStatus.valueOf(404), "Пользователь не найден");
     }
 
     public User createUser(AdminRequest adminRequest) {
@@ -83,7 +82,7 @@ public class AdminService {
              }
          }
          else {
-             throw new NotFoundException("Пользователь не найден");
+             throw new ResponseStatusException(HttpStatus.valueOf(404), "Пользователь не найден");
          }
     }
 
@@ -92,7 +91,7 @@ public class AdminService {
              throw new ResponseStatusException(HttpStatus.valueOf(400), "Имя пользователя уже занято");
 
          if(accountRepository.findUserById(id).isEmpty())
-             throw new NotFoundException("Пользователи не найдены");
+             throw new ResponseStatusException(HttpStatus.valueOf(404), "Пользователи не найдены");
 
          User currentUser = accountRepository.findUserById(id).get();
          currentUser.setUserName(adminRequest.getUsername());
