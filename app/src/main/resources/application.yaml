@@ -5,17 +5,16 @@ server:
 jwt:
   lifetime: 10m
 spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2console
   datasource:
     url: jdbc:h2:./Dev_db
     username: 'sa'
     password:
-    h2:
-      console:
-        enabled: true
-        path: /h2console/
-        settings:
-          web-allow-others: true
   jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
     show-sql: true

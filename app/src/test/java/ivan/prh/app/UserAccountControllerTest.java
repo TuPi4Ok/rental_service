@@ -2,13 +2,16 @@ package ivan.prh.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ivan.prh.app.config.DataLoader;
+import ivan.prh.app.dto.user.AuthUserRequest;
 import ivan.prh.app.dto.user.UserDto;
 import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.AccountRepository;
+import ivan.prh.app.service.UserService;
 import ivan.prh.app.util.JwtTokenUtils;
 import org.instancio.Instancio;
 import org.instancio.Select;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +44,6 @@ class UserAccountControllerTest {
 
 	@Autowired
 	AccountRepository accountRepository;
-
 	@Autowired
 	ObjectMapper om;
 
@@ -48,7 +51,6 @@ class UserAccountControllerTest {
 	@BeforeEach
 	void beforeEach() {
 		user = createUser();
-
 		var notEncodePassword = user.getPassword();
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		accountRepository.save(user);
@@ -57,6 +59,7 @@ class UserAccountControllerTest {
 
 	private String getAuthToken() throws Exception {
 		var data = new HashMap<>();
+		accountRepository.findUserById(user.getId());
 		data.put("username", user.getUserName());
 		data.put("password", user.getPassword());
 

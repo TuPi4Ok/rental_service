@@ -72,7 +72,7 @@ public class RentService {
         return rentRepository.save(rent);
     }
 
-    public String endRent(long id, double lat, double longitude) {
+    public Rent endRent(long id, double lat, double longitude) {
         if (rentRepository.getRentById(id).isEmpty())
             throw new ResponseStatusException(HttpStatus.valueOf(404), "Аренда не найдена");
         Rent rent = rentRepository.getRentById(id).get();
@@ -87,8 +87,7 @@ public class RentService {
         rent.setTimeEnd(LocalDateTime.now());
         rent.setFinalPrice(getCostRent(rent));
         paymentService.takeDownBalance(rent);
-        rentRepository.save(rent);
-        return "Аренда завершена";
+        return rentRepository.save(rent);
     }
 
     public double getCostRent(Rent rent) {

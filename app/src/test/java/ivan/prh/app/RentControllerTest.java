@@ -11,8 +11,10 @@ import ivan.prh.app.repository.TransportRepository;
 import ivan.prh.app.service.RentService;
 import ivan.prh.app.util.JwtTokenUtils;
 import ivan.prh.app.util.Mapper;
+import org.aspectj.lang.annotation.Before;
 import org.instancio.Instancio;
 import org.instancio.Select;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 public class RentControllerTest {
     @Autowired
     BCryptPasswordEncoder passwordEncoder;
@@ -89,6 +93,7 @@ public class RentControllerTest {
                 .supply(Select.field(Rent::getUser), () -> user)
                 .supply(Select.field(Rent::getTransport), () -> transport)
                 .supply(Select.field(Rent::getPriceType), () -> "Minutes")
+                .supply(Select.field(Rent::getTimeEnd), () -> null)
                 .create();
         return rent;
     }
@@ -171,4 +176,44 @@ public class RentControllerTest {
 
         assertThat(rentRepository.getRentById(resultRent.getId()).isPresent()).isTrue();
     }
+
+    @Test
+    void testEndRentPositive() throws Exception {
+        var token = getAuthToken();
+
+        var request = post("/Rent/End/" + rent.getId() + "?lat=10&long=455")
+                .header("Authorization", "Bearer " + token);
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+        var resultRent = om.readValue(body, Rent.class);
+
+        assertThat(resultRent.getTimeEnd()).isNotNull();
+        assertThat(transportRepository.getTransportById(transport.getId()).get().getLatitude()).isEqualTo(10);
+        assertThat(transportRepository.getTransportById(transport.getId()).get().getLongitude()).isEqualTo(455);
+    }
+
+    @Test
+    void testGetRentByParamPositive() throws Exception {
+        var token = getAuthToken();
+
+        var request = get("/Rent/Transport?lat=10&long=455&radius=99999999&type=All")
+                .header("Authorization", "Bearer " + token);
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+        List<Rent> resultRent = (List<Rent>) om.readValue(body, List.class).stream()
+                .map(map -> om.convertValue(map, Rent.class))
+                .toList();
+
+        assertThat(resultRent).isNotNull();
+    }
+
+
 }

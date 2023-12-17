@@ -36,6 +36,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(CorsConfigurer::disable)
+                .headers().frameOptions().disable().and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.GET,"/Account/Me").hasAnyRole("USER", "ADMIN")
                 .antMatchers(HttpMethod.POST,"/Account/SignOut").hasAnyRole("USER", "ADMIN")

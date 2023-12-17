@@ -70,11 +70,11 @@ public class RentController extends BaseController {
             @ApiResponse(code = 404, message = "Аренда не найдена")
     })
     @PostMapping("/End/{rentId}")
-    public ResponseEntity<?> endRent(
+    public Rent endRent(
           @ApiParam(value = "Id аренды", required = true) @PathVariable("rentId") long id,
           @ApiParam(value = "Широта", required = true) @RequestParam("lat") double lat,
           @ApiParam(value = "Долгота", required = true) @RequestParam("long") double longitude) {
-        return ResponseEntity.ok(rentService.endRent(id, lat, longitude));
+        return rentService.endRent(id, lat, longitude);
     }
 
     

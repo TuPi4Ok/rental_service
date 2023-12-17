@@ -61,7 +61,6 @@ public class UserService implements UserDetailsService {
         if (findByUsername(authUserRequest.getUsername()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.valueOf(400), "Имя пользователя уже занято");
         }
-
         User user = new User();
         user.setUserName(authUserRequest.getUsername());
         user.setPassword(passwordEncoder.encode(authUserRequest.getPassword()));

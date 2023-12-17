@@ -2,6 +2,7 @@ package ivan.prh.app.service;
 
 import ivan.prh.app.dto.user.AuthUserRequest;
 import ivan.prh.app.dto.user.AuthUserResponse;
+import ivan.prh.app.repository.AccountRepository;
 import ivan.prh.app.util.JwtTokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,9 +21,12 @@ public class AuthService {
     private JwtTokenUtils jwtTokenUtils;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    AccountRepository accountRepository;
 
     public AuthUserResponse createAuthToken(AuthUserRequest authRequest) {
         try {
+            accountRepository.findUserByUserName(authRequest.getUsername());
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
         } catch (BadCredentialsException e) {
             throw new ResponseStatusException(HttpStatus.valueOf(400), "Неправильный логин или пароль");
