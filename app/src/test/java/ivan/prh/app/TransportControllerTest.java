@@ -2,13 +2,17 @@ package ivan.prh.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ivan.prh.app.config.DataLoader;
+import ivan.prh.app.controller.UserAccountController;
+import ivan.prh.app.dto.user.AuthUserRequest;
 import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.AccountRepository;
 import ivan.prh.app.repository.TransportRepository;
+import ivan.prh.app.service.UserService;
 import ivan.prh.app.util.Mapper;
 import org.instancio.Instancio;
 import org.instancio.Select;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
 public class TransportControllerTest {
     @Autowired
     BCryptPasswordEncoder passwordEncoder;
@@ -47,6 +50,7 @@ public class TransportControllerTest {
     Mapper mapper;
     Transport transport;
     User user;
+
     @BeforeEach
     void beforeEach() {
         user = createUser();
@@ -55,7 +59,14 @@ public class TransportControllerTest {
         accountRepository.save(user);
         user.setPassword(notEncodePassword);
 
-        transport = transportRepository.save(createTransport());
+        transport = createTransport();
+        transportRepository.save(transport);
+    }
+
+    @AfterEach
+    void afterEach() {
+        transportRepository.deleteAll();;
+        accountRepository.deleteAll();
     }
 
     private Transport createTransport() {

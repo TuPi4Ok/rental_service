@@ -22,6 +22,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    @Column(name = "roles")
     private Collection<Role> roles;
     private double balance;
     @OneToMany(mappedBy = "user")

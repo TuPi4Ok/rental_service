@@ -15,12 +15,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.HashMap;
 import java.util.List;
@@ -41,13 +44,13 @@ class UserAccountControllerTest {
 	DataLoader dataLoader;
 	@Autowired
 	MockMvc mockMvc;
-
 	@Autowired
 	AccountRepository accountRepository;
 	@Autowired
 	ObjectMapper om;
 
 	private User user;
+
 	@BeforeEach
 	void beforeEach() {
 		user = createUser();
@@ -57,9 +60,13 @@ class UserAccountControllerTest {
 		user.setPassword(notEncodePassword);
 	}
 
+	@AfterEach
+	void afterEach() {
+		accountRepository.deleteAll();
+	}
+
 	private String getAuthToken() throws Exception {
 		var data = new HashMap<>();
-		accountRepository.findUserById(user.getId());
 		data.put("username", user.getUserName());
 		data.put("password", user.getPassword());
 
@@ -134,7 +141,6 @@ class UserAccountControllerTest {
 	@Test
 	void testUpdateUserPositive() throws Exception {
 		var token = getAuthToken();
-
 		var data = new HashMap<>();
 		var newUserName = user.getUserName() + "123";
 		data.put("username", newUserName);

@@ -14,6 +14,7 @@ import ivan.prh.app.util.Mapper;
 import org.aspectj.lang.annotation.Before;
 import org.instancio.Instancio;
 import org.instancio.Select;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
 public class RentControllerTest {
     @Autowired
     BCryptPasswordEncoder passwordEncoder;
@@ -66,6 +66,13 @@ public class RentControllerTest {
 
         transport = transportRepository.save(createTransport());
         rent = rentRepository.save(createRent());
+    }
+
+    @AfterEach
+    void afterEach() {
+        rentRepository.deleteAll();
+        transportRepository.deleteAll();
+        accountRepository.deleteAll();
     }
 
     private Transport createTransport() {

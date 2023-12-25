@@ -12,9 +12,9 @@ spring:
   datasource:
     url: jdbc:h2:./Dev_db
     username: 'sa'
-    password:
+    password: 'password'
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
