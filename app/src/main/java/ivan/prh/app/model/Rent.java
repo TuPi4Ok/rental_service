@@ -39,4 +39,19 @@ public class Rent {
         if(priceType.equals("Days"))
             priceOfUnit = transport.getDayPrice();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Rent rent = (Rent) o;
+
+        return id.equals(rent.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }

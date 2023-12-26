@@ -36,4 +36,19 @@ public class Transport {
     private User user;
     @OneToMany(mappedBy = "transport")
     private Collection<Rent> rents;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Transport transport = (Transport) o;
+
+        return id.equals(transport.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }

@@ -21,8 +21,6 @@ import java.util.stream.Collectors;
 @EnableScheduling
 public class JwtTokenUtils {
 
-//    @Value("${jwt.secret}")
-//    private String secret;
     private final SecretKey key = Jwts.SIG.HS256.key().build();
 
     @Value("${jwt.lifetime}")

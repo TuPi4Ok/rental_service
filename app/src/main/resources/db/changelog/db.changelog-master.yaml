@@ -1,0 +1,203 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-table-rent
+      author: ivan
+      changes:
+        - createTable:
+            tableName: rent
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: transport_id
+                  type: BIGINT
+              - column:
+                  name: user_id
+                  type: BIGINT
+              - column:
+                  name: time_start
+                  type: TIMESTAMP
+              - column:
+                  name: time_end
+                  type: TIMESTAMP
+              - column:
+                  name: price_of_unit
+                  type: DOUBLE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price_type
+                  type: VARCHAR(255)
+              - column:
+                  name: final_price
+                  type: DOUBLE
+            constraints:
+              primaryKey:
+                columnNames: id
+              foreignKeyConstraints:
+                - foreignKeyConstraint:
+                    baseColumnNames: transport_id
+                    baseTableName: rent
+                    constraintName: FK_RENT_ON_TRANSPORT
+                    referencedColumnNames: id
+                    referencedTableName: transport
+                    onDelete: CASCADE
+                - foreignKeyConstraint:
+                    baseColumnNames: user_id
+                    baseTableName: rent
+                    constraintName: FK_RENT_ON_USER
+                    referencedColumnNames: id
+                    referencedTableName: users
+                    onDelete: CASCADE
+
+  - changeSet:
+      id: create-table-roles
+      author: ivan
+      changes:
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+            constraints:
+              primaryKey:
+                columnNames: id
+
+  - changeSet:
+      id: create-table-transport
+      author: ivan
+      changes:
+        - createTable:
+            tableName: transport
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: can_be_rented
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: transport_type
+                  type: VARCHAR(255)
+              - column:
+                  name: model
+                  type: VARCHAR(255)
+              - column:
+                  name: color
+                  type: VARCHAR(255)
+              - column:
+                  name: identifier
+                  type: VARCHAR(255)
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              - column:
+                  name: latitude
+                  type: DOUBLE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: longitude
+                  type: DOUBLE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: minute_price
+                  type: DOUBLE
+              - column:
+                  name: day_price
+                  type: DOUBLE
+              - column:
+                  name: user_id
+                  type: BIGINT
+            constraints:
+              primaryKey:
+                columnNames: id
+              foreignKeyConstraints:
+                - foreignKeyConstraint:
+                    baseColumnNames: user_id
+                    baseTableName: transport
+                    constraintName: FK_TRANSPORT_ON_USER
+                    referencedColumnNames: id
+                    referencedTableName: users
+                    onDelete: CASCADE
+
+  - changeSet:
+      id: create-table-users
+      author: ivan
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: user_name
+                  type: VARCHAR(255)
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+              - column:
+                  name: balance
+                  type: DOUBLE
+                  constraints:
+                    nullable: false
+            constraints:
+              primaryKey:
+                columnNames: id
+
+  - changeSet:
+      id: create-table-users-roles
+      author: ivan
+      changes:
+        - createTable:
+            tableName: users_roles
+            columns:
+              - column:
+                  name: role_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+            constraints:
+              primaryKey:
+                columnNames: role_id, user_id
+              foreignKeyConstraints:
+                - foreignKeyConstraint:
+                    baseColumnNames: role_id
+                    baseTableName: users_roles
+                    constraintName: fk_userol_on_role
+                    referencedColumnNames: id
+                    referencedTableName: roles
+                    onDelete: CASCADE
+                - foreignKeyConstraint:
+                    baseColumnNames: user_id
+                    baseTableName: users_roles
+                    constraintName: fk_userol_on_user
+                    referencedColumnNames: id
+                    referencedTableName: users
+                    onDelete: CASCADE

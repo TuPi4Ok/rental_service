@@ -26,6 +26,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +81,7 @@ public class RentControllerTest {
                 .ignore(Select.field(Transport::getId))
                 .supply(Select.field(Transport::getUser), () -> user)
                 .supply(Select.field(Transport::getRents), () -> List.of())
+                .supply(Select.field(Transport::isCanBeRented), () -> false)
                 .supply(Select.field(Transport::getTransportType), () -> "Car")
                 .create();
         return transport;
@@ -158,6 +160,26 @@ public class RentControllerTest {
     }
 
     @Test
+    void testGetRentTransportHistoryPositive() throws Exception {
+        var token = getAuthToken();
+
+        var request = get("/Rent/TransportHistory/" + transport.getId())
+                .header("Authorization", "Bearer " + token);
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+        List<Rent> resultRent = (List<Rent>) om.readValue(body, List.class).stream()
+                .map(map -> om.convertValue(map, Rent.class))
+                .toList();
+
+        assertThat(resultRent).isNotNull();
+        assertThat(resultRent.get(0)).isEqualTo(rent);
+    }
+
+    @Test
     void testCreateRentPositive() throws Exception {
         var user = createUser();
         var notEncodePassword = user.getPassword();
@@ -204,7 +226,7 @@ public class RentControllerTest {
     }
 
     @Test
-    void testGetRentByParamPositive() throws Exception {
+    void testGetTransportByParamPositive() throws Exception {
         var token = getAuthToken();
 
         var request = get("/Rent/Transport?lat=10&long=455&radius=99999999&type=All")
@@ -215,12 +237,116 @@ public class RentControllerTest {
                 .andReturn();
 
         var body = result.getResponse().getContentAsString();
-        List<Rent> resultRent = (List<Rent>) om.readValue(body, List.class).stream()
-                .map(map -> om.convertValue(map, Rent.class))
+        List<Transport> resultTransport = (List<Transport>) om.readValue(body, List.class).stream()
+                .map(map -> om.convertValue(map, Transport.class))
                 .toList();
 
-        assertThat(resultRent).isNotNull();
+        assertThat(resultTransport).isNotNull();
+        assertThat(resultTransport.get(0)).isEqualTo(transport);
+    }
+
+    @Test
+    void testGetRentByIdNegative() throws Exception {
+        var token = getAuthToken();
+
+        var request = get("/Rent/0")
+                .header("Authorization", "Bearer " + token);
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andReturn();
+        var message = result.getResponse().getErrorMessage();
+
+        assertThat(message).isEqualTo("Аренда не найдена");
     }
 
 
+    @Test
+    void testGetRentHistoryNegative() throws Exception {
+        user = createUser();
+        var notEncodePassword = user.getPassword();
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        accountRepository.save(user);
+        user.setPassword(notEncodePassword);
+        var token = getAuthToken();
+
+        var request = get("/Rent/MyHistory")
+                .header("Authorization", "Bearer " + token);
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andReturn();
+        var message = result.getResponse().getErrorMessage();
+
+        assertThat(message).isEqualTo("Аренды не найдены");
+    }
+
+    @Test
+    void testGetRentTransportHistoryNegative() throws Exception {
+        var token = getAuthToken();
+        Transport newTransport = createTransport();
+        newTransport =  transportRepository.save(newTransport);
+        var request = get("/Rent/TransportHistory/" + newTransport.getId())
+                .header("Authorization", "Bearer " + token);
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andReturn();
+
+        var message = result.getResponse().getErrorMessage();
+
+        assertThat(message).isEqualTo("Аренды не найдены");
+    }
+
+    @Test
+    void testCreateRentNegative() throws Exception {
+        var token = getAuthToken();
+
+        var request = post("/Rent/New/" + transport.getId() + "?rentType=Minutes")
+                .header("Authorization", "Bearer " + token);
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        var message = result.getResponse().getErrorMessage();
+
+        assertThat(message).isEqualTo("Транспорт уже арендован");
+
+    }
+
+    @Test
+    void testEndRentNegative() throws Exception {
+        var token = getAuthToken();
+
+        rent.setTimeEnd(LocalDateTime.now());
+        rentRepository.save(rent);
+
+        var request = post("/Rent/End/" + rent.getId() + "?lat=10&long=455")
+                .header("Authorization", "Bearer " + token);
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        var message = result.getResponse().getErrorMessage();
+
+        assertThat(message).isEqualTo("Аренда уже завершена");
+    }
+
+    @Test
+    void testGetTransportByParamNegative() throws Exception {
+        var token = getAuthToken();
+
+        var request = get("/Rent/Transport?lat=10&long=455&radius=0&type=All")
+                .header("Authorization", "Bearer " + token);
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andReturn();
+
+        var message = result.getResponse().getErrorMessage();
+
+        assertThat(message).isEqualTo("Транспорт в данном радиусе не найден");
+    }
 }

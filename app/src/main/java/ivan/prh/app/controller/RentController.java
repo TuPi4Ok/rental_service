@@ -2,6 +2,7 @@ package ivan.prh.app.controller;
 
 import io.swagger.annotations.*;
 import ivan.prh.app.model.Rent;
+import ivan.prh.app.model.Transport;
 import ivan.prh.app.service.RentService;
 import ivan.prh.app.service.TransportService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,12 +80,12 @@ public class RentController extends BaseController {
 
     
     @GetMapping("/Transport")
-    public ResponseEntity<?> getRentByParam(
+    public List<Transport> getTransportByParam(
             @ApiParam(value = "Широта", required = true) @RequestParam("lat") double lat,
             @ApiParam(value = "Долгота", required = true) @RequestParam("long") double longitude,
             @ApiParam(value = "Радиус круга поиска транспорта", required = true) @RequestParam("radius") double radius,
             @ApiParam(value = "Тип транспорта [Car, Bike, Scooter, All]", required = true)
             @Pattern(regexp = "^(Car|Bike|Scooter|All)$", message = "Введен неверный тип транспорта") @RequestParam("type") String type) {
-        return ResponseEntity.ok(transportService.getTransportCanBeRented(lat, longitude, radius, type));
+        return transportService.getTransportCanBeRented(lat, longitude, radius, type);
     }
 }
