@@ -20,28 +20,28 @@ public class PaymentService {
     @Autowired
     UserService userService;
 
-    public void overflowBalance(long id) {
+    public User overflowBalance(long id) {
         User user = userService.getCurrentUser();
         if (user.getRoles().contains(dataLoader.getRoleAdmin())) {
-            overflow(id);
+            user = overflow(id);
         } else if (user.getRoles().contains(dataLoader.getRoleUser()) && id == user.getId()) {
-            overflow(id);
+            user = overflow(id);
         } else {
             throw new ResponseStatusException(HttpStatus.valueOf(403), "Недостаточно прав");
         }
-
+        return user;
     }
 
-    private void overflow(long id) {
+    private User overflow(long id) {
         User user = userService.findById(id);
         double overflow = 250000;
         user.setBalance(user.getBalance() + overflow);
-        accountRepository.save(user);
+        return accountRepository.save(user);
     }
 
-    public void takeDownBalance(Rent rent) {
+    public User takeDownBalance(Rent rent) {
         User user = rent.getUser();
         user.setBalance(user.getBalance() - rent.getFinalPrice());
-        accountRepository.save(user);
+        return accountRepository.save(user);
     }
 }
