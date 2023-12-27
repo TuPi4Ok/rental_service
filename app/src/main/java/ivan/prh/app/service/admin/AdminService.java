@@ -1,6 +1,7 @@
 package ivan.prh.app.service.admin;
 
 import ivan.prh.app.dto.admin.AdminRequest;
+import ivan.prh.app.model.Role;
 import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.AccountRepository;
@@ -80,6 +81,7 @@ public class AdminService {
              for(Transport transport : user.getTransports()) {
                  transportService.deleteTransport(transport.getId());
              }
+             accountRepository.delete(user);
          }
          else {
              throw new ResponseStatusException(HttpStatus.valueOf(404), "Пользователь не найден");
@@ -97,11 +99,13 @@ public class AdminService {
          currentUser.setUserName(adminRequest.getUsername());
          currentUser.setPassword(passwordEncoder.encode(adminRequest.getPassword()));
          currentUser.setBalance(adminRequest.getBalance());
-
-         if(adminRequest.isAdmin())
-             currentUser.setRoles(List.of(roleService.findRoleByName("ROLE_ADMIN")));
-         else
-             currentUser.setRoles(List.of(roleService.findRoleByName("ROLE_USER")));
+         List<Role> userRoles = new ArrayList<>();
+         if (adminRequest.isAdmin()) {
+             userRoles.add(roleService.findRoleByName("ROLE_ADMIN"));
+         } else {
+             userRoles.add(roleService.findRoleByName("ROLE_USER"));
+         }
+         currentUser.setRoles(userRoles);
          accountRepository.save(currentUser);
          return currentUser;
     }

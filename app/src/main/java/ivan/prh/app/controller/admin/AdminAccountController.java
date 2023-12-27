@@ -3,6 +3,7 @@ package ivan.prh.app.controller.admin;
 import io.swagger.annotations.*;
 import ivan.prh.app.controller.BaseController;
 import ivan.prh.app.dto.admin.AdminRequest;
+import ivan.prh.app.dto.user.UserDto;
 import ivan.prh.app.model.User;
 import ivan.prh.app.service.admin.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
