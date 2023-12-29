@@ -8,7 +8,7 @@ import java.util.Objects;
 @Data
 public class AdminTransportDto extends TransportDto {
     @NotNull(message = "Не может быть пустым")
-    private long ownerId;
+    long ownerId;
 
     @Override
     public boolean equals(Object o) {

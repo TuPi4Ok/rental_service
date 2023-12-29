@@ -4,12 +4,14 @@ import io.swagger.annotations.*;
 import ivan.prh.app.controller.BaseController;
 import ivan.prh.app.dto.transport.AdminTransportDto;
 import ivan.prh.app.model.Rent;
+import ivan.prh.app.model.Transport;
 import ivan.prh.app.service.admin.AdminTransportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/Admin/Transport")
@@ -27,10 +29,10 @@ public class AdminTransportController extends BaseController {
             @ApiResponse(code = 404, message = "Транспорт не найден")
     })
     @GetMapping("")
-    public ResponseEntity<?> getTransports(
+    public List<Transport> getTransports(
             @ApiParam(value = "Начало выборки", required = true) @RequestParam("start") int start,
             @ApiParam(value = "Размер выборки", required = true) @RequestParam("count") int count) {
-        return ResponseEntity.ok(transportService.getTransport(start, count));
+        return transportService.getTransport(start, count);
     }
     @ApiOperation(value = "Получение транспорта по Id", response = Rent.class)
     @ApiResponses(value = {
@@ -40,9 +42,9 @@ public class AdminTransportController extends BaseController {
             @ApiResponse(code = 404, message = "Транспорт не найден")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<?> getTransport(
+    public Transport getTransport(
             @ApiParam(value = "Id транспорта", required = true) @PathVariable("id") long id) {
-        return ResponseEntity.ok(transportService.getTransport(id));
+        return transportService.getTransport(id);
     }
 
     @ApiOperation(value = "Создание транспорта", response = Rent.class)
@@ -53,8 +55,8 @@ public class AdminTransportController extends BaseController {
             @ApiResponse(code = 404, message = "Транспорт не найден")
     })
     @PostMapping("")
-    public ResponseEntity<?> createTransport(@Valid @RequestBody AdminTransportDto transportDto) {
-        return ResponseEntity.ok(transportService.createTransport(transportDto));
+    public Transport createTransport(@Valid @RequestBody AdminTransportDto transportDto) {
+        return transportService.createTransport(transportDto);
     }
     @ApiOperation(value = "Обновление транспорта по Id", response = Rent.class)
     @ApiResponses(value = {
@@ -64,10 +66,10 @@ public class AdminTransportController extends BaseController {
             @ApiResponse(code = 404, message = "Транспорт не найден")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateTransport(
+    public Transport updateTransport(
             @ApiParam(value = "Id транспорта", required = true) @PathVariable("id") long id,
             @Valid @RequestBody AdminTransportDto transportDto) {
-        return ResponseEntity.ok(transportService.updateTransport(id, transportDto));
+        return transportService.updateTransport(id, transportDto);
     }
 
     @ApiOperation(value = "Удаление транспорта по Id", response = Rent.class)

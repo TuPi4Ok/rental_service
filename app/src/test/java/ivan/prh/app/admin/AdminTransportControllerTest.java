@@ -2,19 +2,17 @@ package ivan.prh.app.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ivan.prh.app.config.DataLoader;
-import ivan.prh.app.dto.admin.AdminRequest;
+import ivan.prh.app.dto.transport.AdminTransportDto;
 import ivan.prh.app.dto.user.AuthUserRequest;
-import ivan.prh.app.dto.user.UserDto;
-import ivan.prh.app.model.Rent;
+import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.AccountRepository;
+import ivan.prh.app.repository.TransportRepository;
 import ivan.prh.app.service.UserService;
-import ivan.prh.app.util.JwtTokenUtils;
+import ivan.prh.app.util.Mapper;
 import org.instancio.Instancio;
 import org.instancio.Select;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class AdminAccountControllerTest {
+public class AdminTransportControllerTest {
     @Autowired
     BCryptPasswordEncoder passwordEncoder;
     @Autowired
@@ -42,16 +40,21 @@ public class AdminAccountControllerTest {
     @Autowired
     MockMvc mockMvc;
     @Autowired
-    AccountRepository accountRepository;
-    @Autowired
-    UserService userService;
+    TransportRepository transportRepository;
     @Autowired
     ObjectMapper om;
-
+    @Autowired
+    AccountRepository accountRepository;
+    @Autowired
+    Mapper mapper;
+    @Autowired
+    UserService userService;
     private List<User> userList = new ArrayList<>();
-    private final String baseUrl = "/Admin/Account";
+    private List<Transport> transportList = new ArrayList<>();
+    private final String baseUrl = "/Admin/Transport";
     private String adminToken;
     private User admin;
+
     @BeforeEach
     void beforeEach() throws Exception {
         accountRepository.deleteAll();
@@ -64,29 +67,27 @@ public class AdminAccountControllerTest {
             user = userService.createNewUser(new AuthUserRequest(user.getUserName(), user.getPassword()));
             userList.add(user);
         }
+        for (int i = 0; i < 10; i++) {
+            var transport = createTransport(i);
+            transport = transportRepository.save(transport);
+            transportList.add(transport);
+        }
     }
 
     @AfterEach
     void afterEach() {
+        transportRepository.deleteAll();
         accountRepository.deleteAll();
     }
 
-    private String getAuthToken(User user) throws Exception {
-        var data = new HashMap<>();
-        data.put("username", user.getUserName());
-        data.put("password", user.getPassword());
-
-        var request = post("/Account/SignIn")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(data));
-
-        var result = mockMvc.perform(request)
-                .andExpect(status().isOk())
-                .andReturn();
-
-        var body = result.getResponse().getContentAsString();
-
-        return om.readValue(body, Map.class).get("token").toString();
+    private Transport createTransport(int index) {
+        var transport = Instancio.of(Transport.class)
+                .ignore(Select.field(Transport::getId))
+                .supply(Select.field(Transport::getUser), () -> userList.get(index))
+                .supply(Select.field(Transport::getRents), () -> List.of())
+                .supply(Select.field(Transport::getTransportType), () -> "Car")
+                .create();
+        return transport;
     }
     private User createUser() {
         var user = Instancio.of(User.class)
@@ -109,8 +110,27 @@ public class AdminAccountControllerTest {
         return admin;
     }
 
+
+    private String getAuthToken(User user) throws Exception {
+        var data = new HashMap<>();
+        data.put("username", user.getUserName());
+        data.put("password", user.getPassword());
+
+        var request = post("/Account/SignIn")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(data));
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+
+        return om.readValue(body, Map.class).get("token").toString();
+    }
+
     @Test
-    void testGetUsersPositive() throws Exception {
+    void testGetTransportsPositive() throws Exception {
 
         var request = get(baseUrl + "?start=4&count=3")
                 .header("Authorization", "Bearer " + adminToken);
@@ -120,19 +140,19 @@ public class AdminAccountControllerTest {
                 .andReturn();
 
         var body = result.getResponse().getContentAsString();
-        List<User> resultUsers = (List<User>) om.readValue(body, List.class).stream()
-                .map(map -> om.convertValue(map, User.class))
+        List<Transport> resultTransport = (List<Transport>) om.readValue(body, List.class).stream()
+                .map(map -> om.convertValue(map, Transport.class))
                 .toList();
 
-        assertThat(resultUsers.get(0)).isEqualTo(userList.get(3));
-        assertThat(resultUsers.get(2)).isEqualTo(userList.get(5));
-        assertThrows(IndexOutOfBoundsException.class, () -> resultUsers.get(3));
+        assertThat(resultTransport.get(0)).isEqualTo(transportList.get(3));
+        assertThat(resultTransport.get(2)).isEqualTo(transportList.get(5));
+        assertThrows(IndexOutOfBoundsException.class, () -> resultTransport.get(3));
     }
 
     @Test
-    void testGetUserPositive() throws Exception {
+    void testGetTransportPositive() throws Exception {
 
-        var request = get(baseUrl + "/" + userList.get(0).getId())
+        var request = get(baseUrl + "/" + transportList.get(1).getId())
                 .header("Authorization", "Bearer " + adminToken);
 
         var result = mockMvc.perform(request)
@@ -140,65 +160,72 @@ public class AdminAccountControllerTest {
                 .andReturn();
 
         var body = result.getResponse().getContentAsString();
-        var resultUser = om.readValue(body, User.class);
+        var resultTransport = om.readValue(body, Transport.class);
 
-        assertThat(resultUser).isEqualTo(userList.get(0));
+        assertThat(resultTransport).isNotNull();
+        assertThat(resultTransport).isEqualTo(transportList.get(1));
     }
 
     @Test
-    void testCreateUserPositive() throws Exception {
-        var adminRequest = Instancio.of(AdminRequest.class).create();
+    void testCreateTransportPositive() throws Exception {
+        var adminTransportDto = Instancio.of(AdminTransportDto.class)
+                .supply(Select.field(AdminTransportDto::getOwnerId), () -> userList.get(1).getId())
+                .supply(Select.field(AdminTransportDto::getTransportType), () -> "Car")
+                .create();
+
         var request = post(baseUrl)
                 .header("Authorization", "Bearer " + adminToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(adminRequest));
+                .content(om.writeValueAsString(adminTransportDto));
 
         var result = mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();
 
         var body = result.getResponse().getContentAsString();
-        var resultUser = om.readValue(body, User.class);
+        var resultTransport = om.readValue(body, Transport.class);
 
-        assertThat(accountRepository.findUserByUserName(adminRequest.getUsername())).isNotNull();
-        assertThat(resultUser.getUserName()).isEqualTo(adminRequest.getUsername());
+        assertThat(transportRepository.getTransportById(resultTransport.getId())).isNotNull();
     }
 
     @Test
-    void testUpdateUserPositive() throws Exception {
-        var adminRequest = Instancio.of(AdminRequest.class).create();
-        var request = put(baseUrl + "/" + userList.get(1).getId())
+    void testUpdateTransportPositive() throws Exception {
+        var adminTransportDto = Instancio.of(AdminTransportDto.class)
+                .supply(Select.field(AdminTransportDto::getOwnerId), () -> userList.get(1).getId())
+                .supply(Select.field(AdminTransportDto::getTransportType), () -> "Car")
+                .create();
+
+        var id  = transportList.get(1).getId();
+        var request = put(baseUrl + "/" + id)
                 .header("Authorization", "Bearer " + adminToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(adminRequest));
+                .content(om.writeValueAsString(adminTransportDto));
 
         var result = mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();
 
-        var body = result.getResponse().getContentAsString();
-        var resultUser = om.readValue(body, User.class);
-
-        assertThat(accountRepository.findUserByUserName(adminRequest.getUsername()).get().getId()).isEqualTo(userList.get(1).getId());
-        assertThat(resultUser.getUserName()).isEqualTo(adminRequest.getUsername());
+        assertThat(transportRepository.getTransportById(id)).isNotNull();
+        assertThat(transportRepository.getTransportById(id).get().getColor()).isEqualTo(adminTransportDto.getColor());
     }
 
     @Test
-    void testDeleteUserPositive() throws Exception {
-        var request = delete(baseUrl + "/" + userList.get(1).getId())
+    void testDeleteTransportPositive() throws Exception {
+        var id  = transportList.get(1).getId();
+        var request = delete(baseUrl + "/" + id)
                 .header("Authorization", "Bearer " + adminToken);
 
         mockMvc.perform(request)
-                .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(status().isOk());
 
-        assertThat(accountRepository.findUserById(userList.get(1).getId()).isEmpty()).isTrue();
+
+        assertThat(transportRepository.getTransportById(id).isEmpty()).isTrue();
     }
 
     @Test
-    void testGetUsersNegative() throws Exception {
+    void testGetTransportsNegative() throws Exception {
 
-        var request = get(baseUrl + "?start=12&count=3")
+        var request = get(baseUrl + "?start=11&count=3")
                 .header("Authorization", "Bearer " + adminToken);
 
         var result = mockMvc.perform(request)
@@ -207,11 +234,11 @@ public class AdminAccountControllerTest {
 
         var message = result.getResponse().getErrorMessage();
 
-        assertThat(message).isEqualTo("Пользователи не найдены");
+        assertThat(message).isEqualTo("Транспорты не найдены");
     }
 
     @Test
-    void testGetUserNegative() throws Exception {
+    void testGetTransportNegative() throws Exception {
 
         var request = get(baseUrl + "/0")
                 .header("Authorization", "Bearer " + adminToken);
@@ -222,54 +249,30 @@ public class AdminAccountControllerTest {
 
         var message = result.getResponse().getErrorMessage();
 
-        assertThat(message).isEqualTo("Пользователь не найден");
+        assertThat(message).isEqualTo("Транспорт не найден");
     }
 
     @Test
-    void testCreateUserNegative() throws Exception {
-        var adminRequest = new AdminRequest(userList.get(0).getUserName(), userList.get(0).getPassword(), false, 0);
-        var request = post(baseUrl)
+    void testUpdateTransportNegative() throws Exception {
+        var adminTransportDto = Instancio.of(AdminTransportDto.class)
+                .supply(Select.field(AdminTransportDto::getOwnerId), () -> userList.get(1).getId())
+                .supply(Select.field(AdminTransportDto::getTransportType), () -> "Car")
+                .create();
+
+        var id  = transportList.get(1).getId();
+        var request = put(baseUrl + "/0")
                 .header("Authorization", "Bearer " + adminToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(adminRequest));
-
-        var result = mockMvc.perform(request)
-                .andExpect(status().isBadRequest())
-                .andReturn();
-
-        var message = result.getResponse().getErrorMessage();
-
-        assertThat(message).isEqualTo("Имя пользователя уже занято");
-    }
-
-    @Test
-    void testUpdateUserNegative() throws Exception {
-        var adminRequest = new AdminRequest(userList.get(0).getUserName(), userList.get(0).getPassword(), false, 0);
-        var request = put(baseUrl + "/" + userList.get(1).getId())
-                .header("Authorization", "Bearer " + adminToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(adminRequest));
-
-        var result = mockMvc.perform(request)
-                .andExpect(status().isBadRequest())
-                .andReturn();
-
-        var message = result.getResponse().getErrorMessage();
-
-        assertThat(message).isEqualTo("Имя пользователя уже занято");
-    }
-
-    @Test
-    void testDeleteUserNegative() throws Exception {
-        var request = delete(baseUrl + "/0")
-                .header("Authorization", "Bearer " + adminToken);
+                .content(om.writeValueAsString(adminTransportDto));
 
         var result = mockMvc.perform(request)
                 .andExpect(status().isNotFound())
                 .andReturn();
 
+
         var message = result.getResponse().getErrorMessage();
 
-        assertThat(message).isEqualTo("Пользователь не найден");
+        assertThat(message).isEqualTo("Транспорт с таким id не найден");
     }
+
 }

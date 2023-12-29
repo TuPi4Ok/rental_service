@@ -34,13 +34,14 @@ public class AdminService {
     AdminTransportService transportService;
 
      public List<User> getAllUsersWithParam(int start, int count) {
-         Pageable pageable = PageRequest.of(0, count + start, Sort.by(Sort.Order.asc("id")));
+         var size = count + start - 1;
+         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Order.asc("id")));
          List<User> userList = accountRepository.findAll(pageable);
 
          List<User> resultUser = new ArrayList<>();
          int offset = 0;
          for(User user : userList) {
-             if(offset >= start)
+             if(offset >= start - 1 && offset < size)
                  resultUser.add(user);
              offset++;
          }

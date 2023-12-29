@@ -31,13 +31,14 @@ public class AdminTransportService {
     AdminRentService rentService;
 
     public List<Transport> getTransport(int start, int count) {
-        Pageable pageable = PageRequest.of(0, count + start, Sort.by(Sort.Order.asc("id")));
+        var size = count + start - 1;
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Order.asc("id")));
         List<Transport> TransportList = transportRepository.findAll(pageable);
 
         List<Transport> resultTransport = new ArrayList<>();
         int offset = 0;
         for(Transport transport : TransportList) {
-            if(offset >= start)
+            if(offset >= start - 1 && offset < size)
                 resultTransport.add(transport);
             offset++;
         }
