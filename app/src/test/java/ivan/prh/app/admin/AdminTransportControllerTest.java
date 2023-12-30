@@ -7,6 +7,7 @@ import ivan.prh.app.dto.user.AuthUserRequest;
 import ivan.prh.app.model.Transport;
 import ivan.prh.app.model.User;
 import ivan.prh.app.repository.AccountRepository;
+import ivan.prh.app.repository.RentRepository;
 import ivan.prh.app.repository.TransportRepository;
 import ivan.prh.app.service.UserService;
 import ivan.prh.app.util.Mapper;

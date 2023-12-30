@@ -57,8 +57,7 @@ public class SpringFoxConfig {
     @Bean
     public ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("Simbir.GO")
-                .description("Документация для API сервиса по аренде автомабилей \"Simbir.GO\".")
+                .description("Документация для API сервиса по аренде автомабилей.")
                 .version("1.0")
                 .build();
     }

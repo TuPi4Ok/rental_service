@@ -32,7 +32,7 @@ public class AdminRentController {
         return rentService.getRent(id);
     }
 
-    @ApiOperation(value = "Получение списка аренда пользователя по его id", response = Rent.class)
+    @ApiOperation(value = "Получение списка аренд пользователя по его id", response = Rent.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Успешно"),
             @ApiResponse(code = 401, message = "Неправильный логин или пароль"),
@@ -45,7 +45,7 @@ public class AdminRentController {
         return rentService.getHistory(id);
     }
 
-    @ApiOperation(value = "Получение списка аренда у транспорта по его id", response = Rent.class)
+    @ApiOperation(value = "Получение списка аренд у транспорта по его id", response = Rent.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Успешно"),
             @ApiResponse(code = 401, message = "Неправильный логин или пароль"),

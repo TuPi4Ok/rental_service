@@ -64,7 +64,7 @@ public class AdminRentService {
         else {
             transport.setCanBeRented(true);
         }
-        if (userService.getCurrentUser().equals(transport.getUser()))
+        if (userService.findById(rentDtoRequest.getUserId()).equals(transport.getUser()))
             throw new ResponseStatusException(HttpStatus.valueOf(400), "Нельзя арендовать собственный транспорт");
         rent.setUser(userService.getCurrentUser());
         rentRepository.save(rent);
@@ -99,9 +99,8 @@ public class AdminRentService {
         return rentRepository.save(rent);
     }
 
-    public String  deleteRent(long id) {
+    public void  deleteRent(long id) {
         Rent rent = getRent(id);
         rentRepository.delete(rent);
-        return "Аренда удалена";
     }
 }
