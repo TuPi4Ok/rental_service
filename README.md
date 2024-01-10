@@ -5,9 +5,11 @@ rental_service - is a web application that is a transportation service managemen
 # Strat
 ```sh
 cd app
-gradle run
+./gradlew bootRun
 ```
 # Start with docker
-
+```sh
+doker run tupi4ok/rent_image
+```
 # Swagger documentation
 http://localhost:5000/api/swagger-ui/
