@@ -12,4 +12,4 @@ cd app
 doker compose up
 ```
 # Swagger documentation
-http://localhost:5000/api/swagger-ui/
+By launching the application you can view the documentation at: http://localhost:5000/api/swagger-ui/
