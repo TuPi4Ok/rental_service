@@ -1,4 +1,4 @@
 report:
 	make -C app report
 start:
-    make -C app start
+	make -C app start
