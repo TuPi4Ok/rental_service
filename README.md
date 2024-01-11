@@ -9,7 +9,7 @@ cd app
 ```
 # Start with docker
 ```sh
-doker run tupi4ok/rent_image
+doker compose up
 ```
 # Swagger documentation
 http://localhost:5000/api/swagger-ui/
