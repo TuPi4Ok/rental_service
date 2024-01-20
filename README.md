@@ -18,5 +18,6 @@ By launching the application you can view the documentation at: http://localhost
 * PostgreSQL, H2
 * liquibase
 * JUnit 5
+* Swagger
 * Docker
 * CI/CD with GitHub Actions
