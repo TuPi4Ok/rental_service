@@ -19,3 +19,4 @@ By launching the application you can view the documentation at: http://localhost
 * liquibase
 * JUnit 5
 * Docker
+* CI/CD with GitHub Actions
